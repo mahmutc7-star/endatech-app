@@ -17,6 +17,20 @@ export const metadata: Metadata = {
     icon: '/favicon.svg',
     apple: '/icon.svg',
   },
+  metadataBase: new URL('https://www.opdrachthub.nl'),
+  openGraph: {
+    title: 'OpdrachtHub - Vind de perfecte match voor uw opdracht',
+    description: 'OpdrachtHub verbindt opdrachtgevers met zelfstandige professionals. Plaats opdrachten, vind talent, en werk samen.',
+    url: 'https://www.opdrachthub.nl',
+    siteName: 'OpdrachtHub',
+    locale: 'nl_NL',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'OpdrachtHub - Vind de perfecte match voor uw opdracht',
+    description: 'OpdrachtHub verbindt opdrachtgevers met zelfstandige professionals.',
+  },
 }
 
 export default function RootLayout({
