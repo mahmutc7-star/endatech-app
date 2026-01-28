@@ -1,0 +1,104 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  name      String
+  userType  UserType
+  company   String?
+  kvkNumber String?
+  bio       String?
+  skills    String[]
+  phone     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  opdrachten               Opdracht[]
+  reacties                 Reactie[]
+  contractsAsOpdrachtgever Contract[] @relation("ContractOpdrachtgever")
+  contractsAsZzp           Contract[] @relation("ContractZzp")
+}
+
+model Opdracht {
+  id           String         @id @default(cuid())
+  title        String
+  description  String
+  scope        String
+  duration     String
+  hourlyRate   Decimal
+  location     String?
+  requirements String?
+  status       OpdrachtStatus @default(OPEN)
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+
+  opdrachtgeverId String
+  opdrachtgever   User      @relation(fields: [opdrachtgeverId], references: [id])
+  reacties        Reactie[]
+  contract        Contract?
+}
+
+model Reactie {
+  id         String        @id @default(cuid())
+  motivation String
+  proposal   String?
+  hourlyRate Decimal?
+  status     ReactieStatus @default(PENDING)
+  createdAt  DateTime      @default(now())
+  updatedAt  DateTime      @updatedAt
+
+  zzpId      String
+  zzp        User     @relation(fields: [zzpId], references: [id])
+  opdrachtId String
+  opdracht   Opdracht @relation(fields: [opdrachtId], references: [id])
+
+  @@unique([zzpId, opdrachtId])
+}
+
+model Contract {
+  id                  String    @id @default(cuid())
+  contractNumber      String    @unique
+  content             String
+  opdrachtgeverSigned Boolean   @default(false)
+  zzpSigned           Boolean   @default(false)
+  opdrachtgeverSignedAt DateTime?
+  zzpSignedAt         DateTime?
+  startDate           DateTime?
+  endDate             DateTime?
+  totalAmount         Decimal?
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  opdrachtId      String   @unique
+  opdracht        Opdracht @relation(fields: [opdrachtId], references: [id])
+  opdrachtgeverId String
+  opdrachtgever   User     @relation("ContractOpdrachtgever", fields: [opdrachtgeverId], references: [id])
+  zzpId           String
+  zzp             User     @relation("ContractZzp", fields: [zzpId], references: [id])
+}
+
+enum UserType {
+  OPDRACHTGEVER
+  ZZP
+}
+
+enum OpdrachtStatus {
+  OPEN
+  IN_SELECTIE
+  GEMATCHT
+  AFGEROND
+  GEANNULEERD
+}
+
+enum ReactieStatus {
+  PENDING
+  GEACCEPTEERD
+  AFGEWEZEN
+}
