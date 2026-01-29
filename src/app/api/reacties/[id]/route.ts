@@ -144,68 +144,108 @@ function generateContractContent(params: ContractParams): string {
     year: 'numeric',
   })
 
+  // Calculate end date based on duration
+  const startDate = today
+  const endDate = opdracht.duration || 'In overleg'
+
   return `
-OVEREENKOMST VAN OPDRACHT
+OVEREENKOMST VAN OPDRACHT – OPDRACHTGEVER – ZZP'ER
 
 Contractnummer: ${contractNumber}
 Datum: ${today}
 
----
+Deze overeenkomst wordt automatisch gegenereerd bij acceptatie van een match.
+OpdrachtHub is geen partij bij deze overeenkomst.
+
+═══════════════════════════════════════════════════════════════
 
 PARTIJEN
 
-1. Opdrachtgever:
-   Naam: ${opdrachtgever.company || opdrachtgever.name}
-   ${opdrachtgever.kvkNumber ? `KvK-nummer: ${opdrachtgever.kvkNumber}` : ''}
-   Vertegenwoordigd door: ${opdrachtgever.name}
+Opdrachtgever: ${opdrachtgever.company || opdrachtgever.name}
+${opdrachtgever.kvkNumber ? `KvK-nummer: ${opdrachtgever.kvkNumber}` : ''}
+Vertegenwoordigd door: ${opdrachtgever.name}
 
-2. Opdrachtnemer:
-   Naam: ${zzp.company || zzp.name}
-   ${zzp.kvkNumber ? `KvK-nummer: ${zzp.kvkNumber}` : ''}
-   Vertegenwoordigd door: ${zzp.name}
+Opdrachtnemer (ZZP'er): ${zzp.company || zzp.name}
+${zzp.kvkNumber ? `KvK-nummer: ${zzp.kvkNumber}` : ''}
+Vertegenwoordigd door: ${zzp.name}
 
----
+═══════════════════════════════════════════════════════════════
 
-OPDRACHT
+ARTIKEL 1 – OPDRACHTOMSCHRIJVING
 
 Titel: ${opdracht.title}
 
-Omschrijving:
+Omschrijving werkzaamheden:
 ${opdracht.description}
 
 Scope: ${opdracht.scope}
-Duur: ${opdracht.duration}
 
----
+═══════════════════════════════════════════════════════════════
 
-VERGOEDING
+ARTIKEL 2 – LOOPTIJD
 
-Uurtarief: € ${parseFloat(hourlyRate.toString()).toFixed(2)}
-Facturatie: Opdrachtnemer factureert direct aan opdrachtgever.
-Betalingstermijn: 30 dagen na factuurdatum.
+Startdatum: ${startDate}
+Einddatum/Duur: ${endDate}
 
----
+═══════════════════════════════════════════════════════════════
 
-BEMIDDELING
+ARTIKEL 3 – VERGOEDING
 
-Deze overeenkomst is tot stand gekomen via OpdrachtHub.
-OpdrachtHub treedt uitsluitend op als bemiddelaar en is geen partij bij deze overeenkomst.
-De bemiddelingsvergoeding (15% van de opdrachtsom) wordt separaat gefactureerd aan de opdrachtgever.
+Tarief: € ${parseFloat(hourlyRate.toString()).toFixed(2)} per uur
+Facturatie rechtstreeks tussen partijen.
 
----
+OpdrachtHub ontvangt geen betalingen namens partijen.
 
-VOORWAARDEN
+═══════════════════════════════════════════════════════════════
 
-1. Opdrachtnemer voert de werkzaamheden zelfstandig uit, zonder gezagsverhouding.
-2. Opdrachtnemer is vrij in de wijze waarop de opdracht wordt uitgevoerd.
-3. Opdrachtnemer is zelf verantwoordelijk voor het afdragen van belastingen en premies.
-4. Deze overeenkomst betreft geen arbeidsovereenkomst.
+ARTIKEL 4 – ZELFSTANDIGHEID
 
----
+Opdrachtnemer verricht werkzaamheden zelfstandig.
+Er is geen arbeidsovereenkomst of gezagsverhouding.
+
+═══════════════════════════════════════════════════════════════
+
+ARTIKEL 5 – VERVANGING
+
+Opdrachtnemer mag zich laten vervangen door een gelijkwaardig professional.
+
+═══════════════════════════════════════════════════════════════
+
+ARTIKEL 6 – AANSPRAKELIJKHEID
+
+Iedere partij is verantwoordelijk voor eigen schade.
+
+═══════════════════════════════════════════════════════════════
+
+ARTIKEL 7 – INTELLECTUEEL EIGENDOM
+
+Resultaten komen toe aan Opdrachtgever, tenzij anders overeengekomen.
+
+═══════════════════════════════════════════════════════════════
+
+ARTIKEL 8 – GEHEIMHOUDING
+
+Vertrouwelijke informatie wordt niet gedeeld met derden.
+
+═══════════════════════════════════════════════════════════════
+
+ARTIKEL 9 – ROL OPDRACHTHUB
+
+OpdrachtHub faciliteert uitsluitend:
+- matching;
+- contractering;
+- administratie.
+
+OpdrachtHub is geen partij bij de uitvoering.
+
+De bemiddelingsvergoeding (15% van de opdrachtsom) wordt separaat
+gefactureerd aan de opdrachtgever door OpdrachtHub.
+
+═══════════════════════════════════════════════════════════════
 
 ONDERTEKENING
 
-Door digitale ondertekening via OpdrachtHub gaan beide partijen akkoord met de voorwaarden van deze overeenkomst.
+Digitale ondertekening via het platform geldt als rechtsgeldige handtekening.
 
 Opdrachtgever: _____________________ Datum: _____
 Opdrachtnemer: _____________________ Datum: _____

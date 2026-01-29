@@ -47,7 +47,7 @@ export default function RootLayout({
             <main className="flex-1">{children}</main>
             <footer className="bg-slate-900 text-white py-12">
               <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="grid md:grid-cols-3 gap-8">
+                <div className="grid md:grid-cols-4 gap-8">
                   <div>
                     <div className="flex items-center gap-2 mb-4">
                       <img src="/icon.svg" alt="OpdrachtHub" className="h-8 w-8" />
@@ -65,6 +65,13 @@ export default function RootLayout({
                       <li><a href="/opdrachten" className="hover:text-emerald-500 transition-colors">Opdrachten</a></li>
                       <li><a href="/registreren" className="hover:text-emerald-500 transition-colors">Registreren</a></li>
                       <li><a href="/login" className="hover:text-emerald-500 transition-colors">Inloggen</a></li>
+                    </ul>
+                  </div>
+                  <div>
+                    <h3 className="font-semibold mb-4">Voorwaarden</h3>
+                    <ul className="space-y-2 text-slate-400 text-sm">
+                      <li><a href="/voorwaarden/zzp" className="hover:text-emerald-500 transition-colors">Voorwaarden ZZP'ers</a></li>
+                      <li><a href="/voorwaarden/opdrachtgever" className="hover:text-emerald-500 transition-colors">Voorwaarden Opdrachtgevers</a></li>
                     </ul>
                   </div>
                   <div>

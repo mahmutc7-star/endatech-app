@@ -291,6 +291,30 @@ export default function RegistrerenPage() {
             </div>
           </div>
 
+          <div className="flex items-start">
+            <div className="flex items-center h-5">
+              <input
+                id="terms"
+                name="terms"
+                type="checkbox"
+                required
+                className="h-4 w-4 text-emerald-600 focus:ring-emerald-500 border-gray-300 rounded"
+              />
+            </div>
+            <div className="ml-3 text-sm">
+              <label htmlFor="terms" className="text-gray-600">
+                Ik ga akkoord met de{' '}
+                <Link
+                  href={userType === 'ZZP' ? '/voorwaarden/zzp' : '/voorwaarden/opdrachtgever'}
+                  target="_blank"
+                  className="text-emerald-600 hover:text-emerald-500 underline"
+                >
+                  {userType === 'ZZP' ? 'gebruikersvoorwaarden voor ZZP\'ers' : 'bemiddelingsovereenkomst'}
+                </Link>
+              </label>
+            </div>
+          </div>
+
           <div>
             <button
               type="submit"
@@ -300,10 +324,6 @@ export default function RegistrerenPage() {
               {loading ? 'Account aanmaken...' : 'Account aanmaken'}
             </button>
           </div>
-
-          <p className="text-center text-sm text-gray-600">
-            Door te registreren gaat u akkoord met onze voorwaarden
-          </p>
         </form>
       </div>
     </div>
