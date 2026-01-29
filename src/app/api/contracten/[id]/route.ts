@@ -92,11 +92,18 @@ export async function PUT(
     }
 
     const body = await request.json()
-    const { action } = body
+    const { action, signature } = body
 
     if (action !== 'sign') {
       return NextResponse.json(
         { error: 'Ongeldige actie' },
+        { status: 400 }
+      )
+    }
+
+    if (!signature || !signature.startsWith('data:image/png;base64,')) {
+      return NextResponse.json(
+        { error: 'Ongeldige handtekening' },
         { status: 400 }
       )
     }
@@ -111,14 +118,21 @@ export async function PUT(
       )
     }
 
-    const updateData: Record<string, boolean | Date> = {}
+    // Get IP address for audit trail
+    const ip = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown'
+
+    const updateData: Record<string, boolean | Date | string> = {}
 
     if (isOpdrachtgever && !contract.opdrachtgeverSigned) {
       updateData.opdrachtgeverSigned = true
       updateData.opdrachtgeverSignedAt = new Date()
+      updateData.opdrachtgeverSignature = signature
+      updateData.opdrachtgeverIp = ip
     } else if (isZzp && !contract.zzpSigned) {
       updateData.zzpSigned = true
       updateData.zzpSignedAt = new Date()
+      updateData.zzpSignature = signature
+      updateData.zzpIp = ip
     } else {
       return NextResponse.json(
         { error: 'U heeft dit contract al ondertekend' },

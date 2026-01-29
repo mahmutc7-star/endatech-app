@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { useSession } from 'next-auth/react'
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
+import SignaturePad from '@/components/signing/SignaturePad'
 
 interface Contract {
   id: string
@@ -13,6 +14,8 @@ interface Contract {
   zzpSigned: boolean
   opdrachtgeverSignedAt: string | null
   zzpSignedAt: string | null
+  opdrachtgeverSignature: string | null
+  zzpSignature: string | null
   createdAt: string
   opdracht: {
     id: string
@@ -42,6 +45,7 @@ export default function ContractDetailPage() {
   const [contract, setContract] = useState<Contract | null>(null)
   const [loading, setLoading] = useState(true)
   const [signing, setSigning] = useState(false)
+  const [showSignaturePad, setShowSignaturePad] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
@@ -68,15 +72,16 @@ export default function ContractDetailPage() {
     }
   }
 
-  const handleSign = async () => {
+  const handleSignatureSubmit = async (signature: string) => {
     setSigning(true)
+    setShowSignaturePad(false)
     setError(null)
 
     try {
       const response = await fetch(`/api/contracten/${params.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'sign' }),
+        body: JSON.stringify({ action: 'sign', signature }),
       })
 
       if (!response.ok) {
@@ -90,6 +95,15 @@ export default function ContractDetailPage() {
     } finally {
       setSigning(false)
     }
+  }
+
+  const getSignerName = () => {
+    if (!contract || !session) return ''
+    const isOpdrachtgever = contract.opdrachtgever.id === session.user?.id
+    if (isOpdrachtgever) {
+      return contract.opdrachtgever.name
+    }
+    return contract.zzp.name
   }
 
   const formatDate = (dateString: string) => {
@@ -264,7 +278,7 @@ export default function ContractDetailPage() {
                 Door te ondertekenen gaat u akkoord met de voorwaarden van dit contract.
               </p>
               <button
-                onClick={handleSign}
+                onClick={() => setShowSignaturePad(true)}
                 disabled={signing}
                 className="px-6 py-3 bg-green-600 text-white font-medium rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50"
               >
@@ -272,6 +286,15 @@ export default function ContractDetailPage() {
               </button>
             </div>
           </div>
+        )}
+
+        {/* Signature Pad Modal */}
+        {showSignaturePad && (
+          <SignaturePad
+            signerName={getSignerName()}
+            onSave={handleSignatureSubmit}
+            onCancel={() => setShowSignaturePad(false)}
+          />
         )}
 
         {hasSigned() && !contract.opdrachtgeverSigned || !contract.zzpSigned ? (

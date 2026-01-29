@@ -63,18 +63,22 @@ model Reactie {
 }
 
 model Contract {
-  id                  String    @id @default(cuid())
-  contractNumber      String    @unique
-  content             String
-  opdrachtgeverSigned Boolean   @default(false)
-  zzpSigned           Boolean   @default(false)
-  opdrachtgeverSignedAt DateTime?
-  zzpSignedAt         DateTime?
-  startDate           DateTime?
-  endDate             DateTime?
-  totalAmount         Decimal?
-  createdAt           DateTime  @default(now())
-  updatedAt           DateTime  @updatedAt
+  id                      String    @id @default(cuid())
+  contractNumber          String    @unique
+  content                 String
+  opdrachtgeverSigned     Boolean   @default(false)
+  zzpSigned               Boolean   @default(false)
+  opdrachtgeverSignedAt   DateTime?
+  zzpSignedAt             DateTime?
+  opdrachtgeverSignature  String?   // Base64 signature image
+  zzpSignature            String?   // Base64 signature image
+  opdrachtgeverIp         String?
+  zzpIp                   String?
+  startDate               DateTime?
+  endDate                 DateTime?
+  totalAmount             Decimal?
+  createdAt               DateTime  @default(now())
+  updatedAt               DateTime  @updatedAt
 
   opdrachtId      String   @unique
   opdracht        Opdracht @relation(fields: [opdrachtId], references: [id])
