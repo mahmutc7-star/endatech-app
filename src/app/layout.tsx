@@ -14,6 +14,14 @@ export const metadata: Metadata = {
     locale: "nl_NL",
     url: "https://www.endatech.nl",
     siteName: "EndaTech",
+    images: [
+      {
+        url: "https://www.endatech.nl/og-image.png",
+        width: 2000,
+        height: 500,
+        alt: "EndaTech - Betaalbare airco's, snel geplaatst",
+      },
+    ],
   },
 };
 
