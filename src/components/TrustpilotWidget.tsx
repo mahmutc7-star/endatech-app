@@ -1,7 +1,7 @@
 "use client";
 
 import Script from "next/script";
-import { useEffect, useRef } from "react";
+import { useRef, useEffect } from "react";
 
 const BUSINESS_UNIT_ID = "668aae6374c09786cb00a814";
 const SCRIPT_SRC = "https://widget.trustpilot.com/bootstrap/v5/tp.widget.bootstrap.min.js";
@@ -12,31 +12,45 @@ declare global {
   }
 }
 
-function useTrustpilotLoad(ref: React.RefObject<HTMLDivElement | null>) {
+function loadWidget(el: HTMLElement | null) {
+  if (!el) return;
+  if (window.Trustpilot) {
+    window.Trustpilot.loadFromElement(el, true);
+  }
+}
+
+function useTrustpilotWidget(ref: React.RefObject<HTMLDivElement | null>) {
   useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const tryLoad = () => {
+    // Try immediately if script already loaded (e.g. navigating back to page)
+    loadWidget(ref.current);
+
+    // Retry loop — keeps trying until Trustpilot is available
+    let attempts = 0;
+    const interval = setInterval(() => {
       if (window.Trustpilot) {
-        window.Trustpilot.loadFromElement(el, true);
+        loadWidget(ref.current);
+        clearInterval(interval);
+      } else if (++attempts > 20) {
+        clearInterval(interval);
       }
-    };
-    // Try immediately (script may already be loaded)
-    tryLoad();
-    // Also try after a short delay as fallback
-    const t = setTimeout(tryLoad, 800);
-    return () => clearTimeout(t);
-  }, [ref]);
+    }, 250);
+
+    return () => clearInterval(interval);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 }
 
 /** Smalle balk in de header */
 export function TrustpilotBanner() {
   const ref = useRef<HTMLDivElement>(null);
-  useTrustpilotLoad(ref);
+  useTrustpilotWidget(ref);
 
   return (
     <>
-      <Script src={SCRIPT_SRC} strategy="afterInteractive" />
+      <Script
+        src={SCRIPT_SRC}
+        strategy="afterInteractive"
+        onLoad={() => loadWidget(ref.current)}
+      />
       <div
         ref={ref}
         className="trustpilot-widget"
@@ -63,11 +77,15 @@ export function TrustpilotBanner() {
 /** Grotere widget op de homepage */
 export function TrustpilotHomepage() {
   const ref = useRef<HTMLDivElement>(null);
-  useTrustpilotLoad(ref);
+  useTrustpilotWidget(ref);
 
   return (
     <>
-      <Script src={SCRIPT_SRC} strategy="afterInteractive" />
+      <Script
+        src={SCRIPT_SRC}
+        strategy="afterInteractive"
+        onLoad={() => loadWidget(ref.current)}
+      />
       <div
         ref={ref}
         className="trustpilot-widget"
