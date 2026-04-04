@@ -5,7 +5,13 @@ export const alt = "EndaTech - Betaalbare airco's, snel geplaatst";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
-export default function OgImage() {
+export default async function OgImage() {
+  const logoData = await fetch(
+    new URL("/logo-horizontal.png", "https://www.endatech.nl")
+  ).then((r) => r.arrayBuffer());
+
+  const logoSrc = `data:image/png;base64,${Buffer.from(logoData).toString("base64")}`;
+
   return new ImageResponse(
     (
       <div
@@ -20,7 +26,6 @@ export default function OgImage() {
           fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif",
         }}
       >
-        {/* White card */}
         <div
           style={{
             display: "flex",
@@ -29,39 +34,23 @@ export default function OgImage() {
             justifyContent: "center",
             background: "white",
             borderRadius: 32,
-            padding: "60px 80px",
+            padding: "50px 80px",
             width: 1000,
             boxShadow: "0 20px 60px rgba(0,0,0,0.3)",
           }}
         >
-          {/* Snowflake + fire icon */}
-          <div style={{ display: "flex", gap: 16, marginBottom: 24 }}>
-            <span style={{ fontSize: 56 }}>❄️</span>
-            <span style={{ fontSize: 56 }}>🔥</span>
-          </div>
-
-          {/* Brand name */}
-          <div
-            style={{
-              fontSize: 80,
-              fontWeight: 900,
-              color: "#1e3a8a",
-              letterSpacing: -2,
-              lineHeight: 1,
-              marginBottom: 16,
-            }}
-          >
-            EndaTech
-          </div>
+          {/* Logo */}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={logoSrc} alt="EndaTech" style={{ height: 90, marginBottom: 32, objectFit: "contain" }} />
 
           {/* Tagline */}
           <div
             style={{
-              fontSize: 32,
+              fontSize: 30,
               color: "#4b5563",
               fontWeight: 500,
               textAlign: "center",
-              marginBottom: 32,
+              marginBottom: 28,
             }}
           >
             Betaalbare airco&apos;s · Snel geplaatst · F-Gassen gecertificeerd
@@ -74,12 +63,12 @@ export default function OgImage() {
               height: 4,
               background: "#2563eb",
               borderRadius: 2,
-              marginBottom: 28,
+              marginBottom: 24,
             }}
           />
 
           {/* Contact */}
-          <div style={{ display: "flex", gap: 48, color: "#6b7280", fontSize: 24 }}>
+          <div style={{ display: "flex", gap: 48, color: "#6b7280", fontSize: 22 }}>
             <span>📞 06-41088447</span>
             <span>🌐 endatech.nl</span>
           </div>
