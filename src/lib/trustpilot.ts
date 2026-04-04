@@ -26,7 +26,9 @@ export async function fetchTrustpilotData(): Promise<TrustpilotData> {
     const reviewMatch = html.match(/"reviewCount":(\d+)/);
 
     const score = scoreMatch ? parseFloat(scoreMatch[1]) : FALLBACK.score;
-    const reviews = reviewMatch ? parseInt(reviewMatch[1]) : FALLBACK.reviews;
+    // Use the highest known count — Trustpilot may lag on pending reviews
+    const liveReviews = reviewMatch ? parseInt(reviewMatch[1]) : 0;
+    const reviews = Math.max(liveReviews, FALLBACK.reviews);
 
     return { score, reviews };
   } catch {
