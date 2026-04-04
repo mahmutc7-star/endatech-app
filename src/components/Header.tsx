@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { LogoHorizontal } from "./Logo";
+import { TrustpilotBanner } from "./TrustpilotWidget";
 
 export function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -90,6 +91,11 @@ export function Header() {
           </div>
         )}
       </nav>
+      <div className="border-t border-gray-100 bg-gray-50 py-1.5 px-4">
+        <div className="max-w-7xl mx-auto">
+          <TrustpilotBanner />
+        </div>
+      </div>
     </header>
   );
 }

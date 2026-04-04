@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Logo } from "@/components/Logo";
+import { TrustpilotHomepage } from "@/components/TrustpilotWidget";
 
 export default function HomePage() {
   return (
@@ -66,6 +67,13 @@ export default function HomePage() {
               <Logo className="scale-150" />
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* Trustpilot */}
+      <section className="py-10 bg-gray-50">
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+          <TrustpilotHomepage />
         </div>
       </section>
 
