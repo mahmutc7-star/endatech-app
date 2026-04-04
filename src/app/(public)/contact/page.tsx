@@ -106,8 +106,8 @@ export default function ContactPage() {
                 </div>
                 <div>
                   <h3 className="font-medium text-gray-900">Telefoon</h3>
-                  <a href="tel:+31612345678" className="text-[#2563EB] hover:underline">
-                    06-12345678
+                  <a href="tel:+31641088447" className="text-[#2563EB] hover:underline">
+                    06-41088447
                   </a>
                 </div>
               </div>
@@ -202,7 +202,7 @@ export default function ContactPage() {
                     id="phone"
                     name="phone"
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#2563EB] focus:border-transparent outline-none transition-all"
-                    placeholder="06-12345678"
+                    placeholder="06-41088447"
                   />
                 </div>
 
