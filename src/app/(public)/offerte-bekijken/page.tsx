@@ -69,7 +69,7 @@ export default function OfferteBekijkenPage() {
     }
   }
 
-  async function handleSign(signature: string) {
+  async function handleSign(signData: { signature: string; device: unknown; location: unknown }) {
     if (!quote) return;
     setShowSignaturePad(false);
     setSigning(true);
@@ -78,7 +78,11 @@ export default function OfferteBekijkenPage() {
       const response = await fetch(`/api/quotes/${quote.quoteNumber}/sign`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ signature }),
+        body: JSON.stringify({
+          signature: signData.signature,
+          device: signData.device,
+          location: signData.location,
+        }),
       });
 
       const data = await response.json();

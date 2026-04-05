@@ -39,7 +39,8 @@ model Quote {
   signedAt        DateTime?
   signature       String?     // Base64 signature image
   signedIp        String?
-  signedDevice    String?     // Device info JSON
+  signedDevice    String?     // Device info JSON (browser, OS, screen, etc.)
+  signedLocation  String?     // Location JSON (lat, lng, accuracy)
 
   // Status
   status          QuoteStatus @default(PENDING)

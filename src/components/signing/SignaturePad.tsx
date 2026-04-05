@@ -2,16 +2,106 @@
 
 import { useRef, useEffect, useState } from 'react'
 
+interface DeviceInfo {
+  userAgent: string
+  platform: string
+  language: string
+  screenWidth: number
+  screenHeight: number
+  pixelRatio: number
+  touchSupport: boolean
+  deviceType: string
+  timestamp: string
+}
+
+interface LocationInfo {
+  latitude: number
+  longitude: number
+  accuracy: number
+}
+
+interface SignatureData {
+  signature: string
+  device: DeviceInfo
+  location: LocationInfo | null
+}
+
 interface SignaturePadProps {
-  onSave: (signature: string) => void
+  onSave: (data: SignatureData) => void
   onCancel: () => void
   signerName: string
+}
+
+function getDeviceType(): string {
+  const ua = navigator.userAgent
+  if (/tablet|ipad|playbook|silk/i.test(ua)) return 'Tablet'
+  if (/mobile|iphone|ipod|android.*mobile|windows phone/i.test(ua)) return 'Telefoon'
+  return 'Computer'
+}
+
+function getDeviceInfo(): DeviceInfo {
+  return {
+    userAgent: navigator.userAgent,
+    platform: navigator.platform || 'unknown',
+    language: navigator.language || 'unknown',
+    screenWidth: window.screen.width,
+    screenHeight: window.screen.height,
+    pixelRatio: window.devicePixelRatio || 1,
+    touchSupport: 'ontouchstart' in window || navigator.maxTouchPoints > 0,
+    deviceType: getDeviceType(),
+    timestamp: new Date().toISOString(),
+  }
+}
+
+function getLocation(): Promise<LocationInfo | null> {
+  return new Promise((resolve) => {
+    if (!navigator.geolocation) {
+      resolve(null)
+      return
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        resolve({
+          latitude: pos.coords.latitude,
+          longitude: pos.coords.longitude,
+          accuracy: Math.round(pos.coords.accuracy),
+        })
+      },
+      () => resolve(null),
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+    )
+  })
 }
 
 export default function SignaturePad({ onSave, onCancel, signerName }: SignaturePadProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const [isDrawing, setIsDrawing] = useState(false)
   const [hasDrawn, setHasDrawn] = useState(false)
+  const [location, setLocation] = useState<LocationInfo | null>(null)
+  const [locationStatus, setLocationStatus] = useState<'asking' | 'granted' | 'denied' | 'unavailable'>('asking')
+  const [submitting, setSubmitting] = useState(false)
+
+  // Request location on mount
+  useEffect(() => {
+    if (!navigator.geolocation) {
+      setLocationStatus('unavailable')
+      return
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        setLocation({
+          latitude: pos.coords.latitude,
+          longitude: pos.coords.longitude,
+          accuracy: Math.round(pos.coords.accuracy),
+        })
+        setLocationStatus('granted')
+      },
+      () => setLocationStatus('denied'),
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+    )
+  }, [])
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -20,23 +110,19 @@ export default function SignaturePad({ onSave, onCancel, signerName }: Signature
     const ctx = canvas.getContext('2d')
     if (!ctx) return
 
-    // Set canvas size
     const rect = canvas.getBoundingClientRect()
     canvas.width = rect.width * 2
     canvas.height = rect.height * 2
     ctx.scale(2, 2)
 
-    // Set drawing style
     ctx.strokeStyle = '#1e293b'
     ctx.lineWidth = 2
     ctx.lineCap = 'round'
     ctx.lineJoin = 'round'
 
-    // Fill with white background
     ctx.fillStyle = '#ffffff'
     ctx.fillRect(0, 0, rect.width, rect.height)
 
-    // Draw signature line
     ctx.strokeStyle = '#e2e8f0'
     ctx.lineWidth = 1
     ctx.beginPath()
@@ -44,7 +130,6 @@ export default function SignaturePad({ onSave, onCancel, signerName }: Signature
     ctx.lineTo(rect.width - 20, rect.height - 40)
     ctx.stroke()
 
-    // Reset stroke style for signature
     ctx.strokeStyle = '#1e293b'
     ctx.lineWidth = 2
   }, [])
@@ -105,11 +190,9 @@ export default function SignaturePad({ onSave, onCancel, signerName }: Signature
 
     const rect = canvas.getBoundingClientRect()
 
-    // Clear and redraw background
     ctx.fillStyle = '#ffffff'
     ctx.fillRect(0, 0, rect.width, rect.height)
 
-    // Redraw signature line
     ctx.strokeStyle = '#e2e8f0'
     ctx.lineWidth = 1
     ctx.beginPath()
@@ -117,19 +200,24 @@ export default function SignaturePad({ onSave, onCancel, signerName }: Signature
     ctx.lineTo(rect.width - 20, rect.height - 40)
     ctx.stroke()
 
-    // Reset stroke style
     ctx.strokeStyle = '#1e293b'
     ctx.lineWidth = 2
 
     setHasDrawn(false)
   }
 
-  const saveSignature = () => {
+  const saveSignature = async () => {
     const canvas = canvasRef.current
     if (!canvas || !hasDrawn) return
 
+    setSubmitting(true)
+
+    // Get fresh location if not already available
+    const loc = location || await getLocation()
+    const device = getDeviceInfo()
     const signature = canvas.toDataURL('image/png')
-    onSave(signature)
+
+    onSave({ signature, device, location: loc })
   }
 
   return (
@@ -159,6 +247,41 @@ export default function SignaturePad({ onSave, onCancel, signerName }: Signature
           <p className="text-xs text-slate-500 mt-2 text-center">
             Gebruik uw vinger of muis om te tekenen
           </p>
+
+          {/* Device & location status */}
+          <div className="mt-3 flex flex-wrap gap-2 justify-center">
+            <span className="inline-flex items-center gap-1 px-2 py-1 bg-slate-100 rounded-full text-xs text-slate-500">
+              <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+              </svg>
+              {getDeviceType()}
+            </span>
+            <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs ${
+              locationStatus === 'granted'
+                ? 'bg-green-50 text-green-600'
+                : locationStatus === 'denied'
+                ? 'bg-yellow-50 text-yellow-600'
+                : locationStatus === 'asking'
+                ? 'bg-blue-50 text-blue-600'
+                : 'bg-slate-100 text-slate-500'
+            }`}>
+              <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+              {locationStatus === 'granted' && 'Locatie vastgelegd'}
+              {locationStatus === 'denied' && 'Locatie geweigerd'}
+              {locationStatus === 'asking' && 'Locatie opvragen...'}
+              {locationStatus === 'unavailable' && 'Locatie niet beschikbaar'}
+            </span>
+          </div>
+        </div>
+
+        <div className="px-4 pb-2">
+          <p className="text-[10px] text-slate-400 text-center">
+            Door te ondertekenen bevestigt u de offerte. Uw apparaatgegevens, IP-adres en locatie worden
+            vastgelegd als bewijs van ondertekening.
+          </p>
         </div>
 
         <div className="p-4 bg-slate-50 rounded-b-2xl flex gap-3">
@@ -176,10 +299,10 @@ export default function SignaturePad({ onSave, onCancel, signerName }: Signature
           </button>
           <button
             onClick={saveSignature}
-            disabled={!hasDrawn}
+            disabled={!hasDrawn || submitting}
             className="flex-1 px-4 py-3 text-white bg-emerald-500 rounded-lg hover:bg-emerald-600 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Ondertekenen
+            {submitting ? 'Verwerken...' : 'Ondertekenen'}
           </button>
         </div>
       </div>

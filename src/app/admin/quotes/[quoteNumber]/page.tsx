@@ -32,6 +32,8 @@ interface Quote {
   signedAt: string | null;
   signature: string | null;
   signedIp: string | null;
+  signedDevice: string | null;
+  signedLocation: string | null;
   status: string;
   createdAt: string;
   lines: QuoteLine[];
@@ -413,36 +415,138 @@ export default function AdminQuotePage() {
           </button>
         </div>
 
-        {/* Signature */}
+        {/* Signature & stamp */}
         {quote.signed && (
           <div className="bg-white rounded-xl border border-gray-100 p-6">
-            <h2 className="font-semibold text-gray-900 mb-4">Handtekening</h2>
+            <h2 className="font-semibold text-gray-900 mb-4">Handtekening & ondertekeningsbewijs</h2>
+
             <div className="grid md:grid-cols-2 gap-6">
-              <dl className="space-y-2 text-sm">
-                <div className="flex gap-2">
-                  <dt className="text-gray-400 w-28 flex-shrink-0">Ondertekend op</dt>
-                  <dd className="text-gray-900">
-                    {quote.signedAt ? new Date(quote.signedAt).toLocaleString("nl-NL") : "—"}
-                  </dd>
-                </div>
-                {quote.signedIp && (
-                  <div className="flex gap-2">
-                    <dt className="text-gray-400 w-28 flex-shrink-0">IP-adres</dt>
-                    <dd className="text-gray-900 font-mono">{quote.signedIp}</dd>
-                  </div>
-                )}
-              </dl>
+              {/* Signature image */}
               {quote.signature && (
                 <div>
-                  <p className="text-xs text-gray-400 mb-2">Handtekening</p>
+                  <p className="text-xs text-gray-400 mb-2 font-medium uppercase tracking-wide">Handtekening</p>
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={quote.signature}
                     alt="Handtekening"
-                    className="border border-gray-200 rounded-lg max-h-32 bg-white"
+                    className="border border-gray-200 rounded-lg max-h-40 bg-white"
                   />
                 </div>
               )}
+
+              {/* Stamp details */}
+              <div className="space-y-4">
+                <div>
+                  <p className="text-xs text-gray-400 mb-2 font-medium uppercase tracking-wide">Ondertekeningsgegevens</p>
+                  <dl className="space-y-2 text-sm">
+                    <div className="flex gap-2">
+                      <dt className="text-gray-400 w-32 flex-shrink-0">Datum/tijd</dt>
+                      <dd className="text-gray-900">
+                        {quote.signedAt ? new Date(quote.signedAt).toLocaleString("nl-NL", {
+                          day: "2-digit", month: "2-digit", year: "numeric",
+                          hour: "2-digit", minute: "2-digit", second: "2-digit"
+                        }) : "—"}
+                      </dd>
+                    </div>
+                    {quote.signedIp && (
+                      <div className="flex gap-2">
+                        <dt className="text-gray-400 w-32 flex-shrink-0">IP-adres</dt>
+                        <dd className="text-gray-900 font-mono text-xs">{quote.signedIp}</dd>
+                      </div>
+                    )}
+                  </dl>
+                </div>
+
+                {/* Device info */}
+                {quote.signedDevice && (() => {
+                  try {
+                    const device = JSON.parse(quote.signedDevice);
+                    return (
+                      <div>
+                        <p className="text-xs text-gray-400 mb-2 font-medium uppercase tracking-wide">Apparaat</p>
+                        <dl className="space-y-2 text-sm">
+                          <div className="flex gap-2">
+                            <dt className="text-gray-400 w-32 flex-shrink-0">Type</dt>
+                            <dd className="text-gray-900">{device.deviceType || "Onbekend"}</dd>
+                          </div>
+                          {device.platform && (
+                            <div className="flex gap-2">
+                              <dt className="text-gray-400 w-32 flex-shrink-0">Platform</dt>
+                              <dd className="text-gray-900">{device.platform}</dd>
+                            </div>
+                          )}
+                          {device.screenWidth && (
+                            <div className="flex gap-2">
+                              <dt className="text-gray-400 w-32 flex-shrink-0">Scherm</dt>
+                              <dd className="text-gray-900">
+                                {device.screenWidth}×{device.screenHeight}px
+                                {device.pixelRatio > 1 ? ` (@${device.pixelRatio}x)` : ""}
+                              </dd>
+                            </div>
+                          )}
+                          {device.touchSupport !== undefined && (
+                            <div className="flex gap-2">
+                              <dt className="text-gray-400 w-32 flex-shrink-0">Touchscreen</dt>
+                              <dd className="text-gray-900">{device.touchSupport ? "Ja" : "Nee"}</dd>
+                            </div>
+                          )}
+                          {device.language && (
+                            <div className="flex gap-2">
+                              <dt className="text-gray-400 w-32 flex-shrink-0">Taal</dt>
+                              <dd className="text-gray-900">{device.language}</dd>
+                            </div>
+                          )}
+                          {device.userAgent && (
+                            <div className="flex gap-2">
+                              <dt className="text-gray-400 w-32 flex-shrink-0">Browser</dt>
+                              <dd className="text-gray-900 text-xs break-all leading-relaxed">{device.userAgent}</dd>
+                            </div>
+                          )}
+                        </dl>
+                      </div>
+                    );
+                  } catch { return null; }
+                })()}
+
+                {/* Location info */}
+                {quote.signedLocation && (() => {
+                  try {
+                    const loc = JSON.parse(quote.signedLocation);
+                    return (
+                      <div>
+                        <p className="text-xs text-gray-400 mb-2 font-medium uppercase tracking-wide">Locatie</p>
+                        <dl className="space-y-2 text-sm">
+                          <div className="flex gap-2">
+                            <dt className="text-gray-400 w-32 flex-shrink-0">Coördinaten</dt>
+                            <dd className="text-gray-900 font-mono text-xs">
+                              {loc.latitude?.toFixed(6)}, {loc.longitude?.toFixed(6)}
+                            </dd>
+                          </div>
+                          {loc.accuracy && (
+                            <div className="flex gap-2">
+                              <dt className="text-gray-400 w-32 flex-shrink-0">Nauwkeurigheid</dt>
+                              <dd className="text-gray-900">{loc.accuracy}m</dd>
+                            </div>
+                          )}
+                          <div className="flex gap-2">
+                            <dt className="text-gray-400 w-32 flex-shrink-0">Kaart</dt>
+                            <dd>
+                              <a
+                                href={`https://www.google.com/maps?q=${loc.latitude},${loc.longitude}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-[#2563EB] hover:underline text-xs"
+                              >
+                                Bekijk op Google Maps →
+                              </a>
+                            </dd>
+                          </div>
+                        </dl>
+                      </div>
+                    );
+                  } catch { return null; }
+                })()}
+              </div>
             </div>
           </div>
         )}
