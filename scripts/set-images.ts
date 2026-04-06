@@ -8,15 +8,15 @@ const prisma = new PrismaClient({ adapter: new PrismaPg(pool) });
 
 // Map: brand + description keywords -> image path
 const IMAGE_RULES: { brand: string; match: (desc: string, type: string, model: string) => boolean; image: string }[] = [
-  // === GREE (from gree.ca official) ===
-  { brand: "Gree", match: (d, t) => d.includes("Fairy") && t === "Wand", image: "/products/gree-fairy.png" },
+  // === GREE (from greebelgium.be + aircobeurs.nl) ===
+  { brand: "Gree", match: (d, t) => d.includes("Fairy") && t === "Wand", image: "/products/gree-fairy.jpg" },
   { brand: "Gree", match: (d, t) => d.includes("Clivia") && t === "Wand", image: "/products/gree-clivia.png" },
-  { brand: "Gree", match: (d, t) => d.includes("Airy") && t === "Wand", image: "/products/gree-airy.png" },
+  { brand: "Gree", match: (d, t) => d.includes("Airy") && t === "Wand", image: "/products/gree-airy.webp" },
   { brand: "Gree", match: (d, t) => d.includes("Charmo") && t === "Wand", image: "/products/gree-charmo.png" },
   { brand: "Gree", match: (_, t) => t === "Console", image: "/products/gree-console.png" },
   { brand: "Gree", match: (_, t) => t === "Cassette", image: "/products/gree-cassette.png" },
   { brand: "Gree", match: (_, t) => t === "Kanaal", image: "/products/gree-kanaal.png" },
-  { brand: "Gree", match: (_, t) => t === "Vloer/Plafond", image: "/products/gree-vloerplafond.png" },
+  { brand: "Gree", match: (_, t) => t === "Vloer/Plafond", image: "/products/gree-vloerplafond.jpg" },
   { brand: "Gree", match: (_, t) => t === "Buitenunit", image: "/products/gree-buitenunit.png" },
   { brand: "Gree", match: (_, t) => t === "Dakairco", image: "/products/gree-lomo.png" },
   // Fallback Gree wand (Free Match indoor wand units)
@@ -30,8 +30,8 @@ const IMAGE_RULES: { brand: string; match: (desc: string, type: string, model: s
   { brand: "Daikin", match: (_, __, m) => m.includes("Ururu"), image: "/products/daikin-ururu-sarara.jpg" },
   { brand: "Daikin", match: (_, __, m) => m.includes("Comfora"), image: "/products/daikin-comfora.jpg" },
 
-  // === LG (from btmalta.com) ===
-  { brand: "LG", match: () => true, image: "/products/lg-wand.png" },
+  // === LG (from klimaat-shop.nl) ===
+  { brand: "LG", match: () => true, image: "/products/lg-wand.jpg" },
 
   // === MITSUBISHI HEAVY (from airco-kopen.nu + mhinederland.nl) ===
   { brand: "Mitsubishi Heavy", match: (d, t) => t === "Wand" && d.includes("Diamond"), image: "/products/mitsubishi-heavy-wand.png" },
