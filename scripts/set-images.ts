@@ -48,7 +48,7 @@ const IMAGE_RULES: { brand: string; match: (desc: string, type: string, model: s
   { brand: "Mitsubishi Heavy", match: (_, t) => t === "Buitenunit", image: "/products/mitsubishi-heavy-buitenunit.png" },
 
   // === MITSUBISHI ELECTRIC (packshots from les.mitsubishielectric.co.uk + aero-airco.be) ===
-  { brand: "Mitsubishi Electric", match: (_, __, m) => m.includes("MSZ-LN"), image: "/products/mitsubishi-electric-msz-ln.png" },
+  { brand: "Mitsubishi Electric", match: (_, __, m) => m.includes("MSZ-LN"), image: "/products/mitsubishi-electric-msz-ln.jpg" },
   { brand: "Mitsubishi Electric", match: (_, __, m) => m.includes("MSZ-EF"), image: "/products/mitsubishi-electric-msz-ef.jpg" },
   { brand: "Mitsubishi Electric", match: (_, t) => t === "Wand", image: "/products/mitsubishi-electric-msz-ap.png" },
   { brand: "Mitsubishi Electric", match: (_, t) => t === "Cassette", image: "/products/gree-cassette.png" },
