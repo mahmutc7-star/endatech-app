@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 
 interface AircoModel {
@@ -17,15 +17,20 @@ interface AircoModel {
   imageUrl: string | null;
 }
 
+interface SeriesGroup {
+  key: string;
+  brand: string;
+  seriesName: string;
+  type: string;
+  imageUrl: string | null;
+  variants: AircoModel[];
+  capacities: string[];
+}
+
 const TYPE_ICONS: Record<string, React.ReactNode> = {
   "Wand": (
     <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
       <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zm0 9.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6z" />
-    </svg>
-  ),
-  "Vloer": (
-    <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12l8.954-8.955a1.126 1.126 0 011.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
     </svg>
   ),
   "Vloer & Plafond": (
@@ -48,21 +53,167 @@ const TYPE_ICONS: Record<string, React.ReactNode> = {
       <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 21v-4.875c0-.621.504-1.125 1.125-1.125h5.25c.621 0 1.125.504 1.125 1.125V21m0 0h4.5V3.545M12.75 21h7.5M10.5 21H3m1.5 0h2.25m0 0V3.545M5.25 3.545l6.75-2.795 6.75 2.795" />
     </svg>
   ),
-  "Kolom": (
-    <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M3 21h18M6 21V6.75m12 0V21M6 6.75h12M6 6.75L12 3l6 3.75" />
-    </svg>
-  ),
 };
 
-const ENERGY_LABEL_COLORS: Record<string, string> = {
-  "A+++": "bg-green-600 text-white",
-  "A++": "bg-green-500 text-white",
-  "A+": "bg-lime-500 text-white",
-  "A": "bg-yellow-400 text-gray-900",
-  "B": "bg-orange-400 text-white",
-  "C": "bg-red-500 text-white",
+const TYPE_ORDER: Record<string, number> = {
+  "Wand": 0,
+  "Vloer & Plafond": 1,
+  "Cassette": 2,
+  "Buitenunit": 3,
+  "Dakairco": 4,
 };
+
+const TYPE_LABELS: Record<string, string> = {
+  "Wand": "Wandmodellen",
+  "Vloer & Plafond": "Vloer- & Plafondmodellen",
+  "Cassette": "Cassettemodellen",
+  "Buitenunit": "Buitenunits",
+  "Dakairco": "Dakairco\u2019s",
+};
+
+function getSeriesName(desc: string | null): string {
+  return (desc || "").split("|")[0].trim() || "Overig";
+}
+
+function parseKw(cap: string | null): number {
+  if (!cap) return 0;
+  return parseFloat(cap.replace(" kW", "").replace(",", ".")) || 0;
+}
+
+function SeriesCard({ group, inclMontage }: { group: SeriesGroup; inclMontage: boolean }) {
+  const [selectedIdx, setSelectedIdx] = useState(0);
+  const selected = group.variants[selectedIdx] || group.variants[0];
+
+  function formatPrice(model: AircoModel): string | null {
+    if (model.price == null) return null;
+    const total = inclMontage && model.installationPrice
+      ? model.price + model.installationPrice
+      : model.price;
+    return `\u20AC ${total.toLocaleString("nl-NL", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  }
+
+  return (
+    <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden hover:shadow-lg transition-shadow">
+      {/* Image */}
+      <div className="aspect-square bg-gray-100 relative overflow-hidden">
+        {selected.imageUrl ? (
+          <img
+            src={selected.imageUrl}
+            alt={`${group.brand} ${group.seriesName}`}
+            className="w-full h-full object-contain p-6"
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center">
+            <svg className="w-20 h-20 text-gray-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+            </svg>
+          </div>
+        )}
+        {selected.energyLabel && (
+          <span className={`absolute top-3 right-3 px-2 py-1 rounded-md text-xs font-bold ${
+            selected.energyLabel === "A+++" ? "bg-green-600 text-white" :
+            selected.energyLabel === "A++" ? "bg-green-500 text-white" :
+            selected.energyLabel === "A+" ? "bg-lime-500 text-white" :
+            "bg-gray-200 text-gray-700"
+          }`}>
+            {selected.energyLabel}
+          </span>
+        )}
+        <span className="absolute top-3 left-3 bg-white/90 backdrop-blur-sm px-2.5 py-1 rounded-md text-xs font-medium text-gray-700">
+          {group.type}
+        </span>
+      </div>
+
+      {/* Content */}
+      <div className="p-5">
+        <p className="text-xs font-semibold text-[#2563EB] uppercase tracking-wide mb-1">
+          {group.brand}
+        </p>
+        <h3 className="text-lg font-bold text-gray-900 mb-3">
+          {group.seriesName}
+        </h3>
+
+        {/* Koelcapaciteit selector */}
+        {group.capacities.length > 1 && (
+          <div className="mb-4">
+            <p className="text-xs font-medium text-gray-500 mb-2">Koelcapaciteit</p>
+            <div className="flex flex-wrap gap-1.5">
+              {group.variants.map((v, i) => (
+                <button
+                  key={v.id}
+                  onClick={() => setSelectedIdx(i)}
+                  className={`px-3 py-1.5 rounded-lg text-sm font-medium border transition-all ${
+                    selectedIdx === i
+                      ? "border-[#2563EB] bg-[#2563EB] text-white"
+                      : "border-gray-200 text-gray-600 hover:border-gray-300 hover:bg-gray-50"
+                  }`}
+                >
+                  {v.coolingCapacity || "n.v.t."}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Specs */}
+        <div className="flex gap-4 text-sm text-gray-500 mb-3">
+          {selected.coolingCapacity && (
+            <div className="flex items-center gap-1">
+              <svg className="w-4 h-4 text-[#22D3EE]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+              </svg>
+              <span>Koelen: {selected.coolingCapacity}</span>
+            </div>
+          )}
+          {selected.heatingCapacity && (
+            <div className="flex items-center gap-1">
+              <svg className="w-4 h-4 text-[#DC2626]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z" />
+              </svg>
+              <span>Verwarmen: {selected.heatingCapacity}</span>
+            </div>
+          )}
+        </div>
+
+        {/* Price */}
+        <div className="border-t border-gray-100 pt-4 mt-4">
+          {selected.price != null ? (
+            <div>
+              <div className="flex items-baseline justify-between">
+                <span className="text-2xl font-bold text-gray-900">
+                  {formatPrice(selected)}
+                </span>
+                <span className="text-xs text-gray-400">excl. BTW</span>
+              </div>
+              {inclMontage && selected.installationPrice ? (
+                <p className="text-xs text-green-600 mt-1 flex items-center gap-1">
+                  <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                  </svg>
+                  Inclusief professionele montage
+                </p>
+              ) : inclMontage ? (
+                <p className="text-xs text-gray-400 mt-1">Montageprijs op aanvraag</p>
+              ) : (
+                <p className="text-xs text-gray-400 mt-1">Alleen product, zonder montage</p>
+              )}
+            </div>
+          ) : (
+            <p className="text-lg font-semibold text-gray-400">Prijs op aanvraag</p>
+          )}
+        </div>
+
+        {/* CTA */}
+        <Link
+          href="/offerte-aanvragen"
+          className="mt-4 w-full inline-flex items-center justify-center px-4 py-2.5 bg-[#2563EB] text-white text-sm font-semibold rounded-lg hover:bg-[#1d4ed8] transition-colors"
+        >
+          Offerte aanvragen
+        </Link>
+      </div>
+    </div>
+  );
+}
 
 export default function ProductenPage() {
   const [models, setModels] = useState<AircoModel[]>([]);
@@ -79,55 +230,72 @@ export default function ProductenPage() {
   }, []);
 
   const brands = [...new Set(models.map((m) => m.brand))].sort();
-
-  // Vaste volgorde: Wand en Vloer bovenaan, rest alfabetisch
-  const TYPE_ORDER: Record<string, number> = {
-    "Wand": 0,
-    "Vloer & Plafond": 1,
-    "Cassette": 2,
-    "Buitenunit": 3,
-    "Dakairco": 4,
-    "Kolom": 5,
-  };
   const types = [...new Set(models.map((m) => m.type))].sort(
     (a, b) => (TYPE_ORDER[a] ?? 99) - (TYPE_ORDER[b] ?? 99)
   );
 
-  const filtered = models.filter((m) => {
-    if (filterBrand !== "ALL" && m.brand !== filterBrand) return false;
-    if (filterType !== "ALL" && m.type !== filterType) return false;
+  // Build series groups from all models
+  const allGroups = useMemo(() => {
+    const groupMap = new Map<string, SeriesGroup>();
+
+    for (const m of models) {
+      const seriesName = getSeriesName(m.description);
+      const key = `${m.brand}::${seriesName}::${m.type}`;
+
+      if (!groupMap.has(key)) {
+        groupMap.set(key, {
+          key,
+          brand: m.brand,
+          seriesName,
+          type: m.type,
+          imageUrl: m.imageUrl,
+          variants: [],
+          capacities: [],
+        });
+      }
+
+      const group = groupMap.get(key)!;
+      const cap = m.coolingCapacity;
+
+      // Skip duplicate capacities (color variants at same kW)
+      if (cap && group.capacities.includes(cap)) continue;
+
+      group.variants.push(m);
+      if (cap) group.capacities.push(cap);
+    }
+
+    // Sort variants within each group by kW
+    for (const group of groupMap.values()) {
+      group.variants.sort((a, b) => parseKw(a.coolingCapacity) - parseKw(b.coolingCapacity));
+      group.capacities = group.variants.map((v) => v.coolingCapacity).filter(Boolean) as string[];
+    }
+
+    return [...groupMap.values()];
+  }, [models]);
+
+  // Filter groups
+  const filtered = allGroups.filter((g) => {
+    if (filterBrand !== "ALL" && g.brand !== filterBrand) return false;
+    if (filterType !== "ALL" && g.type !== filterType) return false;
     return true;
   });
 
-  // Groepeer gefilterde producten per type
-  const groupedByType: { type: string; models: AircoModel[] }[] = [];
-  const typeSet = new Set<string>();
-  for (const m of filtered) {
-    if (!typeSet.has(m.type)) typeSet.add(m.type);
-  }
-  const sortedTypes = [...typeSet].sort(
-    (a, b) => (TYPE_ORDER[a] ?? 99) - (TYPE_ORDER[b] ?? 99)
-  );
-  for (const t of sortedTypes) {
-    groupedByType.push({ type: t, models: filtered.filter((m) => m.type === t) });
-  }
+  // Group filtered series by type
+  const groupedByType = useMemo(() => {
+    const typeGroups: { type: string; series: SeriesGroup[] }[] = [];
+    const seen = new Set<string>();
+    const sortedTypes = [...new Set(filtered.map((g) => g.type))].sort(
+      (a, b) => (TYPE_ORDER[a] ?? 99) - (TYPE_ORDER[b] ?? 99)
+    );
+    for (const t of sortedTypes) {
+      if (seen.has(t)) continue;
+      seen.add(t);
+      typeGroups.push({ type: t, series: filtered.filter((g) => g.type === t) });
+    }
+    return typeGroups;
+  }, [filtered]);
 
-  const TYPE_LABELS: Record<string, string> = {
-    "Wand": "Wandmodellen",
-    "Vloer & Plafond": "Vloer- & Plafondmodellen",
-    "Cassette": "Cassettemodellen",
-    "Buitenunit": "Buitenunits",
-    "Dakairco": "Dakairco\u2019s",
-    "Kolom": "Kolomairco\u2019s",
-  };
-
-  function formatPrice(model: AircoModel): string | null {
-    if (model.price == null) return null;
-    const total = inclMontage && model.installationPrice
-      ? model.price + model.installationPrice
-      : model.price;
-    return `€ ${total.toLocaleString("nl-NL", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-  }
+  const totalSeries = filtered.length;
 
   return (
     <div>
@@ -152,7 +320,6 @@ export default function ProductenPage() {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <h2 className="text-lg font-semibold text-gray-900 mb-5">Kies een categorie</h2>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
-              {/* Alle */}
               <button
                 onClick={() => { setFilterType("ALL"); window.scrollTo({ top: document.getElementById("producten-grid")?.offsetTop ?? 0, behavior: "smooth" }); }}
                 className={`flex flex-col items-center gap-2.5 p-4 rounded-xl border-2 transition-all text-center ${
@@ -168,12 +335,14 @@ export default function ProductenPage() {
                 </div>
                 <div>
                   <p className={`text-sm font-semibold ${filterType === "ALL" ? "text-[#2563EB]" : "text-gray-900"}`}>Alles</p>
-                  <p className="text-xs text-gray-400">{models.filter((m) => filterBrand === "ALL" || m.brand === filterBrand).length}</p>
+                  <p className="text-xs text-gray-400">
+                    {allGroups.filter((g) => filterBrand === "ALL" || g.brand === filterBrand).length} series
+                  </p>
                 </div>
               </button>
 
               {types.map((t) => {
-                const count = models.filter((m) => m.type === t && (filterBrand === "ALL" || m.brand === filterBrand)).length;
+                const count = allGroups.filter((g) => g.type === t && (filterBrand === "ALL" || g.brand === filterBrand)).length;
                 if (count === 0) return null;
                 return (
                   <button
@@ -194,7 +363,7 @@ export default function ProductenPage() {
                     </div>
                     <div>
                       <p className={`text-sm font-semibold ${filterType === t ? "text-[#2563EB]" : "text-gray-900"}`}>{TYPE_LABELS[t] || t}</p>
-                      <p className="text-xs text-gray-400">{count} model{count !== 1 ? "len" : ""}</p>
+                      <p className="text-xs text-gray-400">{count} serie{count !== 1 ? "s" : ""}</p>
                     </div>
                   </button>
                 );
@@ -208,9 +377,7 @@ export default function ProductenPage() {
       <section className="py-4 bg-white border-b border-gray-100 sticky top-[80px] z-40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-            {/* Filters */}
             <div className="flex flex-wrap gap-3">
-              {/* Brand filter */}
               <select
                 value={filterBrand}
                 onChange={(e) => setFilterBrand(e.target.value)}
@@ -222,7 +389,6 @@ export default function ProductenPage() {
                 ))}
               </select>
 
-              {/* Active filter indicator */}
               {filterType !== "ALL" && (
                 <button
                   onClick={() => setFilterType("ALL")}
@@ -236,7 +402,6 @@ export default function ProductenPage() {
               )}
             </div>
 
-            {/* Montage toggle */}
             <div className="flex items-center gap-3 bg-gray-50 rounded-xl px-4 py-2.5">
               <span className={`text-sm font-medium ${!inclMontage ? "text-gray-900" : "text-gray-400"}`}>
                 Excl. montage
@@ -270,7 +435,7 @@ export default function ProductenPage() {
               <div className="inline-block w-8 h-8 border-4 border-gray-200 border-t-[#2563EB] rounded-full animate-spin" />
               <p className="mt-4 text-gray-500">Producten laden...</p>
             </div>
-          ) : filtered.length === 0 ? (
+          ) : totalSeries === 0 ? (
             <div className="text-center py-16">
               <svg className="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
@@ -280,123 +445,22 @@ export default function ProductenPage() {
             </div>
           ) : (
             <>
-              <p className="text-sm text-gray-500 mb-6">{filtered.length} product{filtered.length !== 1 ? "en" : ""} gevonden</p>
+              <p className="text-sm text-gray-500 mb-6">{totalSeries} serie{totalSeries !== 1 ? "s" : ""} gevonden</p>
 
-              {groupedByType.map((group) => (
-                <div key={group.type} className="mb-12 last:mb-0">
-                  {/* Groep header */}
+              {groupedByType.map((typeGroup) => (
+                <div key={typeGroup.type} className="mb-12 last:mb-0">
                   <div className="flex items-center gap-3 mb-5">
                     <h2 className="text-2xl font-bold text-gray-900">
-                      {TYPE_LABELS[group.type] || group.type}
+                      {TYPE_LABELS[typeGroup.type] || typeGroup.type}
                     </h2>
                     <span className="text-sm text-gray-400 bg-gray-100 px-2.5 py-0.5 rounded-full">
-                      {group.models.length}
+                      {typeGroup.series.length}
                     </span>
                   </div>
 
                   <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {group.models.map((model) => (
-                      <div
-                        key={model.id}
-                        className="bg-white rounded-2xl border border-gray-100 overflow-hidden hover:shadow-lg transition-shadow"
-                      >
-                        {/* Image */}
-                        <div className="aspect-square bg-gray-100 relative overflow-hidden">
-                          {model.imageUrl ? (
-                            <img
-                              src={model.imageUrl}
-                              alt={`${model.brand} ${model.model}`}
-                              className="w-full h-full object-contain p-6"
-                            />
-                          ) : (
-                            <div className="w-full h-full flex items-center justify-center">
-                              <svg className="w-20 h-20 text-gray-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-                              </svg>
-                            </div>
-                          )}
-                          {/* Energy label badge */}
-                          {model.energyLabel && (
-                            <span className={`absolute top-3 right-3 px-2 py-1 rounded-md text-xs font-bold ${ENERGY_LABEL_COLORS[model.energyLabel] || "bg-gray-200 text-gray-700"}`}>
-                              {model.energyLabel}
-                            </span>
-                          )}
-                          {/* Type badge */}
-                          <span className="absolute top-3 left-3 bg-white/90 backdrop-blur-sm px-2.5 py-1 rounded-md text-xs font-medium text-gray-700">
-                            {model.type}
-                          </span>
-                        </div>
-
-                        {/* Content */}
-                        <div className="p-5">
-                          <p className="text-xs font-semibold text-[#2563EB] uppercase tracking-wide mb-1">
-                            {model.brand}
-                          </p>
-                          <h3 className="text-lg font-bold text-gray-900 mb-2">
-                            {model.model}
-                          </h3>
-
-                          {/* Specs */}
-                          <div className="flex gap-4 text-sm text-gray-500 mb-3">
-                            {model.coolingCapacity && (
-                              <div className="flex items-center gap-1">
-                                <svg className="w-4 h-4 text-[#22D3EE]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-                                </svg>
-                                <span>{model.coolingCapacity}</span>
-                              </div>
-                            )}
-                            {model.heatingCapacity && (
-                              <div className="flex items-center gap-1">
-                                <svg className="w-4 h-4 text-[#DC2626]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z" />
-                                </svg>
-                                <span>{model.heatingCapacity}</span>
-                              </div>
-                            )}
-                          </div>
-
-                          {model.description && (
-                            <p className="text-sm text-gray-500 mb-4 line-clamp-2">{model.description}</p>
-                          )}
-
-                          {/* Price */}
-                          <div className="border-t border-gray-100 pt-4 mt-4">
-                            {model.price != null ? (
-                              <div>
-                                <div className="flex items-baseline justify-between">
-                                  <span className="text-2xl font-bold text-gray-900">
-                                    {formatPrice(model)}
-                                  </span>
-                                  <span className="text-xs text-gray-400">excl. BTW</span>
-                                </div>
-                                {inclMontage && model.installationPrice ? (
-                                  <p className="text-xs text-green-600 mt-1 flex items-center gap-1">
-                                    <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
-                                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                                    </svg>
-                                    Inclusief professionele montage
-                                  </p>
-                                ) : inclMontage ? (
-                                  <p className="text-xs text-gray-400 mt-1">Montageprijs op aanvraag</p>
-                                ) : (
-                                  <p className="text-xs text-gray-400 mt-1">Alleen product, zonder montage</p>
-                                )}
-                              </div>
-                            ) : (
-                              <p className="text-lg font-semibold text-gray-400">Prijs op aanvraag</p>
-                            )}
-                          </div>
-
-                          {/* CTA */}
-                          <Link
-                            href="/offerte-aanvragen"
-                            className="mt-4 w-full inline-flex items-center justify-center px-4 py-2.5 bg-[#2563EB] text-white text-sm font-semibold rounded-lg hover:bg-[#1d4ed8] transition-colors"
-                          >
-                            Offerte aanvragen
-                          </Link>
-                        </div>
-                      </div>
+                    {typeGroup.series.map((group) => (
+                      <SeriesCard key={group.key} group={group} inclMontage={inclMontage} />
                     ))}
                   </div>
                 </div>
