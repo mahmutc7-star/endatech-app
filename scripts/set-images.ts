@@ -9,7 +9,11 @@ const prisma = new PrismaClient({ adapter: new PrismaPg(pool) });
 // Map: brand + description keywords -> image path
 const IMAGE_RULES: { brand: string; match: (desc: string, type: string, model: string) => boolean; image: string }[] = [
   // === GREE (from greebelgium.be + aircobeurs.nl) ===
+  { brand: "Gree", match: (d, t) => d.includes("Fairy") && t === "Wand" && d.includes("antraciet"), image: "/products/gree-fairy-zwart.jpg" },
+  { brand: "Gree", match: (d, t) => d.includes("Fairy") && t === "Wand" && d.includes("zilver"), image: "/products/gree-fairy-zilver.jpg" },
   { brand: "Gree", match: (d, t) => d.includes("Fairy") && t === "Wand", image: "/products/gree-fairy.jpg" },
+  { brand: "Gree", match: (d, t) => d.includes("Clivia") && t === "Wand" && d.includes("antraciet"), image: "/products/gree-clivia-zwart.png" },
+  { brand: "Gree", match: (d, t) => d.includes("Clivia") && t === "Wand" && d.includes("zilver"), image: "/products/gree-fairy-zilver.jpg" },
   { brand: "Gree", match: (d, t) => d.includes("Clivia") && t === "Wand", image: "/products/gree-clivia.png" },
   { brand: "Gree", match: (d, t) => d.includes("Airy") && t === "Wand", image: "/products/gree-airy.webp" },
   { brand: "Gree", match: (d, t) => d.includes("Charmo") && t === "Wand", image: "/products/gree-charmo.png" },
@@ -18,11 +22,14 @@ const IMAGE_RULES: { brand: string; match: (desc: string, type: string, model: s
   { brand: "Gree", match: (_, t) => t === "Kanaal", image: "/products/gree-kanaal.png" },
   { brand: "Gree", match: (_, t) => t === "Vloer/Plafond", image: "/products/gree-vloerplafond.jpg" },
   { brand: "Gree", match: (_, t) => t === "Buitenunit", image: "/products/gree-buitenunit.png" },
-  { brand: "Gree", match: (_, t) => t === "Dakairco", image: "/products/gree-lomo.png" },
+  { brand: "Gree", match: (_, t) => t === "Dakairco", image: "/products/gree-dakairco.jpg" },
   // Fallback Gree wand (Free Match indoor wand units)
   { brand: "Gree", match: (_, t) => t === "Wand", image: "/products/gree-clivia.png" },
 
   // === DAIKIN (from daikin-ce.com official DAM packshots 1280px) ===
+  { brand: "Daikin", match: (_, __, m) => m === "Stylish FTXA-BB", image: "/products/daikin-stylish-zwart.jpg" },
+  { brand: "Daikin", match: (_, __, m) => m === "Stylish FTXA-BS", image: "/products/daikin-stylish-zilver.jpg" },
+  { brand: "Daikin", match: (_, __, m) => m === "Stylish FTXA-BT", image: "/products/daikin-stylish-zwarthout.jpg" },
   { brand: "Daikin", match: (_, __, m) => m.includes("Stylish"), image: "/products/daikin-stylish.jpg" },
   { brand: "Daikin", match: (_, __, m) => m.includes("Emura"), image: "/products/daikin-emura.jpg" },
   { brand: "Daikin", match: (_, __, m) => m.includes("Perfera Vloer"), image: "/products/daikin-perfera-vloer.jpg" },
