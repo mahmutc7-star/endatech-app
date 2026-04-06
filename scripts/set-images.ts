@@ -20,7 +20,7 @@ const IMAGE_RULES: { brand: string; match: (desc: string, type: string, model: s
   { brand: "Gree", match: (_, t) => t === "Console", image: "/products/gree-console.png" },
   { brand: "Gree", match: (_, t) => t === "Cassette", image: "/products/gree-cassette.png" },
   { brand: "Gree", match: (_, t) => t === "Kanaal", image: "/products/gree-kanaal.png" },
-  { brand: "Gree", match: (_, t) => t === "Vloer/Plafond", image: "/products/gree-vloerplafond.jpg" },
+  { brand: "Gree", match: (_, t) => t === "Vloer & Plafond", image: "/products/gree-vloerplafond.png" },
   { brand: "Gree", match: (_, t) => t === "Buitenunit", image: "/products/gree-buitenunit.png" },
   { brand: "Gree", match: (_, t) => t === "Dakairco", image: "/products/gree-dakairco.jpg" },
   // Fallback Gree wand (Free Match indoor wand units)
