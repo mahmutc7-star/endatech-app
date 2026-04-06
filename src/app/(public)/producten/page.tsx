@@ -25,7 +25,23 @@ interface SeriesGroup {
   imageUrl: string | null;
   variants: AircoModel[];
   capacities: string[];
+  colors: string[];
 }
+
+function getColor(desc: string | null): string | null {
+  const match = (desc || "").match(/Kleur:\s*([^|]+)/);
+  return match ? match[1].trim() : null;
+}
+
+const COLOR_DISPLAY: Record<string, { label: string; css: string }> = {
+  "wit": { label: "Wit", css: "bg-white border-gray-300" },
+  "white": { label: "Wit", css: "bg-white border-gray-300" },
+  "zwart": { label: "Zwart", css: "bg-gray-900 border-gray-900" },
+  "antraciet": { label: "Antraciet", css: "bg-gray-700 border-gray-700" },
+  "zilver": { label: "Zilver", css: "bg-gray-300 border-gray-400" },
+  "zwart hout": { label: "Zwart Hout", css: "bg-amber-950 border-amber-950" },
+  "Titanium / Contrast zwart-wit": { label: "Titanium", css: "bg-gradient-to-r from-gray-200 to-gray-500 border-gray-400" },
+};
 
 const TYPE_ICONS: Record<string, React.ReactNode> = {
   "Wand": (
@@ -100,8 +116,15 @@ function parseKw(cap: string | null): number {
 }
 
 function SeriesCard({ group, inclMontage }: { group: SeriesGroup; inclMontage: boolean }) {
-  const [selectedIdx, setSelectedIdx] = useState(0);
-  const selected = group.variants[selectedIdx] || group.variants[0];
+  const [selectedCap, setSelectedCap] = useState(group.capacities[0] || "");
+  const [selectedColor, setSelectedColor] = useState(group.colors[0] || "");
+
+  // Find the variant matching selected capacity + color
+  const selected = group.variants.find((v) => {
+    const capMatch = !selectedCap || v.coolingCapacity === selectedCap;
+    const colorMatch = !selectedColor || getColor(v.description) === selectedColor;
+    return capMatch && colorMatch;
+  }) || group.variants.find((v) => v.coolingCapacity === selectedCap) || group.variants[0];
 
   function formatPrice(model: AircoModel): string | null {
     if (model.price == null) return null;
@@ -153,26 +176,53 @@ function SeriesCard({ group, inclMontage }: { group: SeriesGroup; inclMontage: b
         </h3>
 
         {/* Koelcapaciteit selector */}
-        {group.capacities.length > 1 ? (
-          <div className="mb-4">
+        {group.capacities.length > 1 && (
+          <div className="mb-3">
             <p className="text-xs font-medium text-gray-500 mb-2">Koelcapaciteit</p>
             <div className="flex flex-wrap gap-1.5">
-              {group.variants.map((v, i) => (
+              {group.capacities.map((cap) => (
                 <button
-                  key={v.id}
-                  onClick={() => setSelectedIdx(i)}
+                  key={cap}
+                  onClick={() => setSelectedCap(cap)}
                   className={`px-3 py-1.5 rounded-lg text-sm font-medium border transition-all ${
-                    selectedIdx === i
+                    selectedCap === cap
                       ? "border-[#2563EB] bg-[#2563EB] text-white"
                       : "border-gray-200 text-gray-600 hover:border-gray-300 hover:bg-gray-50"
                   }`}
                 >
-                  {v.coolingCapacity || "n.v.t."}
+                  {cap}
                 </button>
               ))}
             </div>
           </div>
-        ) : null}
+        )}
+
+        {/* Kleur selector */}
+        {group.colors.length > 1 && (
+          <div className="mb-3">
+            <p className="text-xs font-medium text-gray-500 mb-2">Kleur</p>
+            <div className="flex flex-wrap gap-2">
+              {group.colors.map((color) => {
+                const cd = COLOR_DISPLAY[color] || { label: color, css: "bg-gray-200 border-gray-300" };
+                return (
+                  <button
+                    key={color}
+                    onClick={() => setSelectedColor(color)}
+                    className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium border transition-all ${
+                      selectedColor === color
+                        ? "ring-2 ring-[#2563EB] ring-offset-1"
+                        : "hover:bg-gray-50"
+                    }`}
+                    title={cd.label}
+                  >
+                    <span className={`w-4 h-4 rounded-full border ${cd.css}`} />
+                    <span className="text-gray-700">{cd.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
 
         {/* Specs */}
         <div className="flex flex-col gap-2 text-sm text-gray-500 mb-3">
@@ -278,25 +328,24 @@ export default function ProductenPage() {
           imageUrl: m.imageUrl,
           variants: [],
           capacities: [],
+          colors: [],
         });
       }
 
       const group = groupMap.get(key)!;
-      const cap = m.coolingCapacity;
-
-      // Skip duplicate capacities (color variants at same kW)
-      if (cap && group.capacities.includes(cap)) continue;
-      // For products without kW: skip if we already have one in this group
-      if (!cap && group.variants.length > 0 && !group.variants[0].coolingCapacity) continue;
-
       group.variants.push(m);
-      if (cap) group.capacities.push(cap);
+
+      const cap = m.coolingCapacity;
+      if (cap && !group.capacities.includes(cap)) group.capacities.push(cap);
+
+      const color = getColor(m.description);
+      if (color && !group.colors.includes(color)) group.colors.push(color);
     }
 
-    // Sort variants within each group by kW
+    // Sort capacities by kW and variants
     for (const group of groupMap.values()) {
+      group.capacities.sort((a, b) => parseKw(a) - parseKw(b));
       group.variants.sort((a, b) => parseKw(a.coolingCapacity) - parseKw(b.coolingCapacity));
-      group.capacities = group.variants.map((v) => v.coolingCapacity).filter(Boolean) as string[];
     }
 
     return [...groupMap.values()];
