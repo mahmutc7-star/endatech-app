@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import { sendAdminSignatureNotification } from "@/lib/email";
 
 export async function POST(
   request: Request,
@@ -116,6 +117,13 @@ export async function POST(
         status: "SIGNED",
       },
     });
+
+    // Notify admin about the signature
+    sendAdminSignatureNotification({
+      quoteNumber: quote.quoteNumber,
+      name: quote.name,
+      signedAt: now.toLocaleString("nl-NL", { timeZone: "Europe/Amsterdam" }),
+    }).catch((err) => console.error("Error sending signature notification email:", err));
 
     return NextResponse.json({
       success: true,

@@ -10,6 +10,7 @@ export function Header() {
 
   const navLinks = [
     { href: "/", label: "Home" },
+    { href: "/producten", label: "Producten" },
     { href: "/offerte-aanvragen", label: "Offerte aanvragen" },
     { href: "/offerte-bekijken", label: "Offerte bekijken" },
     { href: "/onderhoud-service", label: "Onderhoud & Service" },

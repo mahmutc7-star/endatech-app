@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import { sendQuoteRequestConfirmation, sendAdminNewQuoteNotification } from "@/lib/email";
 
 function generateQuoteNumber(): string {
   const year = new Date().getFullYear();
@@ -48,6 +49,12 @@ export async function POST(request: Request) {
         status: "PENDING",
       },
     });
+
+    // Send emails (don't block the response)
+    Promise.all([
+      sendQuoteRequestConfirmation(email, { name, quoteNumber }),
+      sendAdminNewQuoteNotification({ quoteNumber, name, city, propertyType, rooms, phone }),
+    ]).catch((err) => console.error("Error sending quote request emails:", err));
 
     return NextResponse.json({
       success: true,

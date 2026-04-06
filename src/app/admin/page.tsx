@@ -70,12 +70,20 @@ export default function AdminPage() {
             <LogoHorizontal />
             <span className="text-sm font-medium text-gray-500 border-l border-gray-200 pl-3">Admin</span>
           </div>
-          <button
-            onClick={handleLogout}
-            className="text-sm text-gray-500 hover:text-gray-800 transition-colors"
-          >
-            Uitloggen
-          </button>
+          <div className="flex items-center gap-4">
+            <Link
+              href="/admin/airco-modellen"
+              className="text-sm text-[#2563EB] hover:text-[#1d4ed8] font-medium transition-colors"
+            >
+              Airco Modellen
+            </Link>
+            <button
+              onClick={handleLogout}
+              className="text-sm text-gray-500 hover:text-gray-800 transition-colors"
+            >
+              Uitloggen
+            </button>
+          </div>
         </div>
       </header>
 
