@@ -317,12 +317,12 @@ export default function ProductenPage() {
                         className="bg-white rounded-2xl border border-gray-100 overflow-hidden hover:shadow-lg transition-shadow"
                       >
                         {/* Image */}
-                        <div className="aspect-[4/3] bg-gray-100 relative overflow-hidden">
+                        <div className="aspect-square bg-gray-100 relative overflow-hidden">
                           {model.imageUrl ? (
                             <img
                               src={model.imageUrl}
                               alt={`${model.brand} ${model.model}`}
-                              className="w-full h-full object-contain p-4"
+                              className="w-full h-full object-contain p-6"
                             />
                           ) : (
                             <div className="w-full h-full flex items-center justify-center">
