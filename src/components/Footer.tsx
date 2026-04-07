@@ -45,10 +45,10 @@ export function Footer() {
           <div>
             <h3 className="font-semibold text-lg mb-4">Diensten</h3>
             <ul className="space-y-2 text-gray-400">
-              <li>Airco verkoop</li>
-              <li>Airco installatie</li>
-              <li>Onderhoud & service</li>
-              <li>Storingen oplossen</li>
+              <li><Link href="/producten" className="hover:text-white transition-colors">Airco verkoop</Link></li>
+              <li><Link href="/installatie" className="hover:text-white transition-colors">Airco installatie</Link></li>
+              <li><Link href="/onderhoud-service" className="hover:text-white transition-colors">Onderhoud & service</Link></li>
+              <li><Link href="/storingen" className="hover:text-white transition-colors">Storingen oplossen</Link></li>
             </ul>
           </div>
 
