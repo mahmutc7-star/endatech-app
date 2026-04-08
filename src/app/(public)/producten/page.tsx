@@ -526,7 +526,7 @@ export default function ProductenPage() {
       </section>
 
       {/* Products Grid */}
-      <section id="producten-grid" className="py-12 bg-[#F0FAFE]">
+      <section id="producten-grid" className="py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {loading ? (
             <div className="text-center py-16">
