@@ -118,7 +118,7 @@ export default function ProductDetailPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid md:grid-cols-2 gap-8 md:gap-12">
             {/* Image */}
-            <div className="bg-gray-50 rounded-2xl p-8 flex items-center justify-center aspect-square">
+            <div className="bg-[#EBF2FF] rounded-2xl p-8 flex items-center justify-center aspect-square">
               {product.imageUrl ? (
                 <img src={product.imageUrl} alt={`${product.brand} ${product.model}`} className="max-w-full max-h-full object-contain" />
               ) : (
@@ -419,7 +419,7 @@ export default function ProductDetailPage() {
                 return (
                   <Link key={rel.id} href={`/producten/${rel.id}`} className="bg-white rounded-xl border border-gray-100 p-4 hover:shadow-md transition-shadow">
                     {rel.imageUrl && (
-                      <div className="aspect-square bg-gray-50 rounded-lg mb-3 flex items-center justify-center p-3">
+                      <div className="aspect-square bg-[#EBF2FF] rounded-lg mb-3 flex items-center justify-center p-3">
                         <img src={rel.imageUrl} alt={rel.model} className="max-w-full max-h-full object-contain" />
                       </div>
                     )}

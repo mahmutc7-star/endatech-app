@@ -145,7 +145,7 @@ function SeriesCard({ group, inclMontage }: { group: SeriesGroup; inclMontage: b
   return (
     <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden hover:shadow-lg transition-shadow">
       {/* Image - clickable */}
-      <Link href={`/producten/${selected.id}`} className="block aspect-square bg-gray-100 relative overflow-hidden cursor-pointer">
+      <Link href={`/producten/${selected.id}`} className="block aspect-square bg-[#EBF2FF] relative overflow-hidden cursor-pointer">
         {selected.imageUrl ? (
           <img
             src={selected.imageUrl}
