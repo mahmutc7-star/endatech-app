@@ -73,6 +73,8 @@ export default function AdminQuotePage() {
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState("");
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   // Form state
   const [description, setDescription] = useState("");
@@ -407,21 +409,7 @@ export default function AdminQuotePage() {
         {/* Save & delete buttons */}
         <div className="flex justify-between items-center">
           <button
-            onClick={() => {
-              if (!window.confirm("Weet je zeker dat je deze offerte wilt verwijderen? Dit kan niet ongedaan worden.")) return;
-              fetch(`/api/admin/quotes/${quoteNumber}`, {
-                method: "DELETE",
-                credentials: "include",
-              })
-                .then((res) => {
-                  if (res.ok) {
-                    router.push("/admin");
-                  } else {
-                    res.text().then((t) => setError("Verwijderen mislukt: " + t));
-                  }
-                })
-                .catch(() => setError("Verwijderen mislukt — probeer opnieuw"));
-            }}
+            onClick={() => setShowDeleteModal(true)}
             className="px-4 py-2.5 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors text-sm font-medium"
           >
             Offerte verwijderen
@@ -571,6 +559,56 @@ export default function AdminQuotePage() {
           </div>
         )}
       </main>
+
+      {/* Delete confirmation modal */}
+      {showDeleteModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-lg max-w-sm w-full p-6">
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">Offerte verwijderen?</h3>
+            <p className="text-gray-600 text-sm mb-6">
+              Weet je zeker dat je offerte <strong>{quoteNumber}</strong> wilt verwijderen? Dit kan niet ongedaan worden.
+            </p>
+            <div className="flex gap-3 justify-end">
+              <button
+                type="button"
+                onClick={() => setShowDeleteModal(false)}
+                disabled={deleting}
+                className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+              >
+                Annuleren
+              </button>
+              <button
+                type="button"
+                disabled={deleting}
+                onClick={async () => {
+                  setDeleting(true);
+                  try {
+                    const res = await fetch(`/api/admin/quotes/${quoteNumber}`, {
+                      method: "DELETE",
+                      credentials: "include",
+                    });
+                    if (res.ok) {
+                      router.push("/admin");
+                    } else {
+                      const data = await res.text();
+                      setError("Verwijderen mislukt: " + data);
+                      setShowDeleteModal(false);
+                    }
+                  } catch {
+                    setError("Verwijderen mislukt — probeer opnieuw");
+                    setShowDeleteModal(false);
+                  } finally {
+                    setDeleting(false);
+                  }
+                }}
+                className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50"
+              >
+                {deleting ? "Verwijderen..." : "Verwijderen"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

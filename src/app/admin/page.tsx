@@ -35,6 +35,8 @@ export default function AdminPage() {
   const [quotes, setQuotes] = useState<Quote[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("ALL");
+  const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   const fetchQuotes = useCallback(async () => {
     try {
@@ -184,20 +186,7 @@ export default function AdminPage() {
                             onClick={(e) => {
                               e.stopPropagation();
                               e.preventDefault();
-                              const nr = quote.quoteNumber;
-                              if (!window.confirm(`Offerte ${nr} verwijderen?`)) return;
-                              fetch(`/api/admin/quotes/${nr}`, {
-                                method: "DELETE",
-                                credentials: "include",
-                              })
-                                .then((res) => {
-                                  if (res.ok) {
-                                    setQuotes((prev) => prev.filter((q) => q.quoteNumber !== nr));
-                                  } else {
-                                    res.text().then((t) => alert("Verwijderen mislukt: " + t));
-                                  }
-                                })
-                                .catch((err) => alert("Fout: " + err.message));
+                              setDeleteTarget(quote.quoteNumber);
                             }}
                             className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                             title="Verwijderen"
@@ -216,6 +205,55 @@ export default function AdminPage() {
           )}
         </div>
       </main>
+
+      {/* Delete confirmation modal */}
+      {deleteTarget && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-lg max-w-sm w-full p-6">
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">Offerte verwijderen?</h3>
+            <p className="text-gray-600 text-sm mb-6">
+              Weet je zeker dat je offerte <strong>{deleteTarget}</strong> wilt verwijderen? Dit kan niet ongedaan worden.
+            </p>
+            <div className="flex gap-3 justify-end">
+              <button
+                type="button"
+                onClick={() => setDeleteTarget(null)}
+                disabled={deleting}
+                className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+              >
+                Annuleren
+              </button>
+              <button
+                type="button"
+                disabled={deleting}
+                onClick={async () => {
+                  setDeleting(true);
+                  try {
+                    const res = await fetch(`/api/admin/quotes/${deleteTarget}`, {
+                      method: "DELETE",
+                      credentials: "include",
+                    });
+                    if (res.ok) {
+                      setQuotes((prev) => prev.filter((q) => q.quoteNumber !== deleteTarget));
+                      setDeleteTarget(null);
+                    } else {
+                      const data = await res.text();
+                      alert("Verwijderen mislukt: " + data);
+                    }
+                  } catch (err) {
+                    alert("Fout: " + (err instanceof Error ? err.message : "onbekend"));
+                  } finally {
+                    setDeleting(false);
+                  }
+                }}
+                className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50"
+              >
+                {deleting ? "Verwijderen..." : "Verwijderen"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
