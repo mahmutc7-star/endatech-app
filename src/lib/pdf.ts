@@ -157,26 +157,31 @@ export function generateQuotePDF(quote: QuoteData): Buffer {
   doc.setFillColor(BRAND_RED);
   doc.rect(0, 32, pageWidth, 1.5, "F");
 
-  // Logo or text
+  // Logo (aspect ratio 3.82:1 — 600x157px)
+  const logoHeight = 14;
+  const logoWidth = logoHeight * 3.82; // ~53.5mm, maintains aspect ratio
+  const logoY = (32 - logoHeight) / 2; // vertically center in header
+
   if (logoBase64) {
     try {
-      doc.addImage(logoBase64, "PNG", margin, 4, 55, 24);
+      doc.addImage(logoBase64, "PNG", margin, logoY, logoWidth, logoHeight);
     } catch {
-      // Fallback to text
-      doc.setFontSize(20);
-      doc.setFont("helvetica", "bold");
-      doc.setTextColor("#ffffff");
-      doc.text("ENDATECH", margin, 18);
+      drawTextLogo();
     }
   } else {
+    drawTextLogo();
+  }
+
+  function drawTextLogo() {
     doc.setFontSize(20);
     doc.setFont("helvetica", "bold");
     doc.setTextColor("#ffffff");
     doc.text("ENDA", margin, 18);
+    const endaW = doc.getTextWidth("ENDA");
     doc.setTextColor(BRAND_RED);
-    const endaWidth = doc.getTextWidth("ENDA");
-    doc.text("TECH", margin + endaWidth, 18);
+    doc.text("TECH", margin + endaW, 18);
     doc.setFontSize(8);
+    doc.setFont("helvetica", "normal");
     doc.setTextColor("#ffffff");
     doc.text("Duurzaam koelen en verwarmen", margin, 24);
   }
