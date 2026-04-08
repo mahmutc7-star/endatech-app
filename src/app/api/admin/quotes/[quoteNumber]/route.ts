@@ -119,6 +119,7 @@ export async function PATCH(
       await sendQuoteReadyNotification(quote.email, {
         name: quote.name,
         quoteNumber: quote.quoteNumber,
+        phone: quote.phone,
       });
     } catch (err) {
       console.error("Error sending quote ready email:", err);

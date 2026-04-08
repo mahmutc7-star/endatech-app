@@ -48,7 +48,9 @@ function button(url: string, text: string): string {
 export async function sendQuoteRequestConfirmation(to: string, data: {
   name: string;
   quoteNumber: string;
+  phone: string;
 }) {
+  const directLink = `${baseUrl}/offerte-bekijken?nr=${encodeURIComponent(data.quoteNumber)}&tel=${encodeURIComponent(data.phone)}`;
   const html = layout(`
     <h2 style="color:#1e3a5f;font-size:20px;">Bedankt voor uw aanvraag, ${data.name}!</h2>
     <p style="color:#334155;line-height:1.6;">
@@ -58,10 +60,11 @@ export async function sendQuoteRequestConfirmation(to: string, data: {
       <span style="font-size:24px;font-weight:bold;color:#1e3a5f;letter-spacing:2px;">${data.quoteNumber}</span>
     </div>
     <p style="color:#334155;line-height:1.6;">
-      <strong>Bewaar dit nummer goed!</strong> U heeft dit nodig om uw offerte later te bekijken en te ondertekenen.
+      Wij nemen uw aanvraag zo snel mogelijk in behandeling. U ontvangt een e-mail met een directe link zodra uw offerte klaar is.
     </p>
-    <p style="color:#334155;line-height:1.6;">
-      Wij nemen uw aanvraag zo snel mogelijk in behandeling. U ontvangt een e-mail zodra uw offerte klaar is.
+    ${button(directLink, 'Offerte bekijken')}
+    <p style="color:#64748b;font-size:13px;text-align:center;margin-top:-8px;">
+      De offerte is pas beschikbaar nadat wij deze hebben opgesteld.
     </p>
     <p style="color:#64748b;font-size:14px;margin-top:24px;">
       Heeft u vragen? Neem gerust contact met ons op via <a href="mailto:info@endatech.nl" style="color:#1e3a5f;">info@endatech.nl</a>.
@@ -158,23 +161,20 @@ export async function sendAdminNewQuoteNotification(data: {
 export async function sendQuoteReadyNotification(to: string, data: {
   name: string;
   quoteNumber: string;
+  phone: string;
 }) {
+  const directLink = `${baseUrl}/offerte-bekijken?nr=${encodeURIComponent(data.quoteNumber)}&tel=${encodeURIComponent(data.phone)}`;
   const html = layout(`
     <h2 style="color:#1e3a5f;font-size:20px;">Uw offerte is klaar, ${data.name}!</h2>
     <p style="color:#334155;line-height:1.6;">
-      Goed nieuws! Uw offerte <strong>${data.quoteNumber}</strong> is opgesteld en klaar om te bekijken.
+      Goed nieuws! Uw offerte <strong>${data.quoteNumber}</strong> is opgesteld en klaar om te bekijken en te ondertekenen.
     </p>
+    ${button(directLink, 'Offerte bekijken & ondertekenen')}
     <p style="color:#334155;line-height:1.6;">
-      Klik op de onderstaande knop om uw offerte te bekijken. U heeft uw offertenummer en telefoonnummer nodig.
+      Klik op de knop hierboven om direct uw offerte te openen. U kunt de offerte bekijken en digitaal ondertekenen.
     </p>
-    ${button(`${baseUrl}/offerte-bekijken`, 'Offerte bekijken')}
-    <div style="background:#f0f9ff;border-radius:8px;padding:16px;margin:16px 0;">
-      <p style="margin:0;color:#334155;font-size:14px;">
-        <strong>Uw offertenummer:</strong> ${data.quoteNumber}
-      </p>
-    </div>
     <p style="color:#64748b;font-size:14px;margin-top:24px;">
-      Heeft u vragen over de offerte? Neem gerust contact met ons op via <a href="mailto:info@endatech.nl" style="color:#1e3a5f;">info@endatech.nl</a>.
+      Heeft u vragen over de offerte? Neem gerust contact met ons op via <a href="mailto:info@endatech.nl" style="color:#1e3a5f;">info@endatech.nl</a> of bel ons.
     </p>
   `);
 

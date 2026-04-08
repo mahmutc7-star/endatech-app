@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import SignaturePad from "@/components/signing/SignaturePad";
 import type { SignatureData } from "@/components/signing/SignaturePad";
@@ -58,6 +59,20 @@ function fmt(n: number) {
 }
 
 export default function OfferteBekijkenPage() {
+  return (
+    <Suspense fallback={
+      <div className="py-12 md:py-16 text-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#2563EB] mx-auto"></div>
+        <p className="mt-4 text-gray-500">Laden...</p>
+      </div>
+    }>
+      <OfferteBekijkenContent />
+    </Suspense>
+  );
+}
+
+function OfferteBekijkenContent() {
+  const searchParams = useSearchParams();
   const [quoteNumber, setQuoteNumber] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [quote, setQuote] = useState<Quote | null>(null);
@@ -67,6 +82,35 @@ export default function OfferteBekijkenPage() {
   const [signed, setSigned] = useState(false);
   const [showSignaturePad, setShowSignaturePad] = useState(false);
   const [docHash, setDocHash] = useState("");
+  const [autoLoaded, setAutoLoaded] = useState(false);
+
+  // Auto-fill and auto-load from URL parameters
+  useEffect(() => {
+    const nr = searchParams.get("nr");
+    const tel = searchParams.get("tel");
+    if (nr) setQuoteNumber(nr.toUpperCase());
+    if (tel) setPhoneNumber(tel);
+    if (nr && tel && !autoLoaded) {
+      setAutoLoaded(true);
+      autoLookup(nr.toUpperCase(), tel);
+    }
+  }, [searchParams, autoLoaded]);
+
+  async function autoLookup(nr: string, tel: string) {
+    setLoading(true);
+    setError("");
+    try {
+      const response = await fetch(`/api/quotes/${nr}?phone=${encodeURIComponent(tel)}`);
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Offerte niet gevonden");
+      setQuote(data);
+      if (data.signed) setSigned(true);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Er is iets misgegaan");
+    } finally {
+      setLoading(false);
+    }
+  }
 
   async function handleLookup(e: React.FormEvent) {
     e.preventDefault();

@@ -53,7 +53,7 @@ export async function POST(request: Request) {
     // Send emails (must await on serverless/Vercel)
     try {
       await Promise.all([
-        sendQuoteRequestConfirmation(email, { name, quoteNumber }),
+        sendQuoteRequestConfirmation(email, { name, quoteNumber, phone }),
         sendAdminNewQuoteNotification({ quoteNumber, name, city, propertyType, rooms, phone }),
       ]);
     } catch (err) {
