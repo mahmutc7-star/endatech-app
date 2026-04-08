@@ -88,6 +88,9 @@ export async function sendAdminNewQuoteNotification(data: {
 }) {
   const html = layout(`
     <h2 style="color:#1e3a5f;font-size:20px;">Nieuwe offerte-aanvraag</h2>
+    <p style="color:#334155;line-height:1.6;">
+      Er is een nieuwe offerte-aanvraag binnengekomen. Hieronder vind je de klantgegevens en het stappenplan.
+    </p>
     <table style="width:100%;border-collapse:collapse;margin:16px 0;">
       <tr><td style="padding:8px;color:#64748b;border-bottom:1px solid #e2e8f0;">Offertenummer</td><td style="padding:8px;font-weight:bold;border-bottom:1px solid #e2e8f0;">${data.quoteNumber}</td></tr>
       <tr><td style="padding:8px;color:#64748b;border-bottom:1px solid #e2e8f0;">Klant</td><td style="padding:8px;border-bottom:1px solid #e2e8f0;">${data.name}</td></tr>
@@ -96,7 +99,50 @@ export async function sendAdminNewQuoteNotification(data: {
       <tr><td style="padding:8px;color:#64748b;border-bottom:1px solid #e2e8f0;">Woningtype</td><td style="padding:8px;border-bottom:1px solid #e2e8f0;">${data.propertyType}</td></tr>
       <tr><td style="padding:8px;color:#64748b;">Ruimtes</td><td style="padding:8px;">${data.rooms}</td></tr>
     </table>
-    ${button(`${baseUrl}/admin/quotes/${data.quoteNumber}`, 'Offerte bekijken in admin')}
+
+    ${button(`${baseUrl}/admin/quotes/${data.quoteNumber}`, 'Offerte openen in admin')}
+
+    <div style="background:#f0f9ff;border-radius:8px;padding:20px;margin:24px 0;">
+      <h3 style="color:#1e3a5f;font-size:16px;margin:0 0 16px;">Stappenplan</h3>
+      <table style="width:100%;border-collapse:collapse;">
+        <tr>
+          <td style="padding:8px 12px;vertical-align:top;">
+            <span style="background:#1e3a5f;color:#fff;border-radius:50%;width:24px;height:24px;display:inline-block;text-align:center;line-height:24px;font-size:13px;font-weight:bold;">1</span>
+          </td>
+          <td style="padding:8px 0;color:#334155;line-height:1.5;">
+            <strong>Open de offerte</strong><br>
+            <span style="color:#64748b;font-size:13px;">Klik op de knop hierboven om de offerte te openen in het admin panel.</span>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:8px 12px;vertical-align:top;">
+            <span style="background:#1e3a5f;color:#fff;border-radius:50%;width:24px;height:24px;display:inline-block;text-align:center;line-height:24px;font-size:13px;font-weight:bold;">2</span>
+          </td>
+          <td style="padding:8px 0;color:#334155;line-height:1.5;">
+            <strong>Stel de offerte op</strong><br>
+            <span style="color:#64748b;font-size:13px;">Vul de omschrijving, producten/regels, prijzen en vervaldatum in.</span>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:8px 12px;vertical-align:top;">
+            <span style="background:#1e3a5f;color:#fff;border-radius:50%;width:24px;height:24px;display:inline-block;text-align:center;line-height:24px;font-size:13px;font-weight:bold;">3</span>
+          </td>
+          <td style="padding:8px 0;color:#334155;line-height:1.5;">
+            <strong>Verstuur naar de klant</strong><br>
+            <span style="color:#64748b;font-size:13px;">Zet de status op <strong>SENT</strong> en klik op Opslaan. De klant ontvangt automatisch een e-mail met een link om de offerte te bekijken.</span>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:8px 12px;vertical-align:top;">
+            <span style="background:#1e3a5f;color:#fff;border-radius:50%;width:24px;height:24px;display:inline-block;text-align:center;line-height:24px;font-size:13px;font-weight:bold;">4</span>
+          </td>
+          <td style="padding:8px 0;color:#334155;line-height:1.5;">
+            <strong>Klant ondertekent</strong><br>
+            <span style="color:#64748b;font-size:13px;">De klant bekijkt de offerte en kan digitaal ondertekenen. Je ontvangt een e-mail zodra dit is gebeurd.</span>
+          </td>
+        </tr>
+      </table>
+    </div>
   `);
 
   await transporter.sendMail({
@@ -158,9 +204,47 @@ export async function sendAdminSignatureNotification(data: {
       <tr><td style="padding:8px;color:#64748b;">Ondertekend op</td><td style="padding:8px;">${data.signedAt}</td></tr>
     </table>
     ${button(`${baseUrl}/admin/quotes/${data.quoteNumber}`, 'Bekijk handtekening')}
-    <p style="color:#334155;line-height:1.6;">
-      U kunt de status nu wijzigen naar <strong>ACCEPTED</strong> om het werk in te plannen.
-    </p>
+    <div style="background:#f0fdf4;border-radius:8px;padding:20px;margin:24px 0;border:1px solid #bbf7d0;">
+      <h3 style="color:#166534;font-size:16px;margin:0 0 12px;">Vervolgstappen</h3>
+      <table style="width:100%;border-collapse:collapse;">
+        <tr>
+          <td style="padding:6px 12px;vertical-align:top;">
+            <span style="background:#166534;color:#fff;border-radius:50%;width:24px;height:24px;display:inline-block;text-align:center;line-height:24px;font-size:13px;font-weight:bold;">1</span>
+          </td>
+          <td style="padding:6px 0;color:#334155;line-height:1.5;">
+            <strong>Controleer de handtekening</strong><br>
+            <span style="color:#64748b;font-size:13px;">Open de offerte en bekijk de handtekening, het IP-adres en de apparaatgegevens.</span>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:6px 12px;vertical-align:top;">
+            <span style="background:#166534;color:#fff;border-radius:50%;width:24px;height:24px;display:inline-block;text-align:center;line-height:24px;font-size:13px;font-weight:bold;">2</span>
+          </td>
+          <td style="padding:6px 0;color:#334155;line-height:1.5;">
+            <strong>Bevestig de opdracht</strong><br>
+            <span style="color:#64748b;font-size:13px;">Zet de status op <strong>ACCEPTED</strong> om de installatie in te plannen.</span>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:6px 12px;vertical-align:top;">
+            <span style="background:#166534;color:#fff;border-radius:50%;width:24px;height:24px;display:inline-block;text-align:center;line-height:24px;font-size:13px;font-weight:bold;">3</span>
+          </td>
+          <td style="padding:6px 0;color:#334155;line-height:1.5;">
+            <strong>Neem contact op met de klant</strong><br>
+            <span style="color:#64748b;font-size:13px;">Plan een installatiedatum en informeer de klant.</span>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:6px 12px;vertical-align:top;">
+            <span style="background:#166534;color:#fff;border-radius:50%;width:24px;height:24px;display:inline-block;text-align:center;line-height:24px;font-size:13px;font-weight:bold;">4</span>
+          </td>
+          <td style="padding:6px 0;color:#334155;line-height:1.5;">
+            <strong>Rond af</strong><br>
+            <span style="color:#64748b;font-size:13px;">Na de installatie: zet de status op <strong>COMPLETED</strong>.</span>
+          </td>
+        </tr>
+      </table>
+    </div>
   `);
 
   await transporter.sendMail({

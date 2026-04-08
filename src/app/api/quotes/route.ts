@@ -50,11 +50,15 @@ export async function POST(request: Request) {
       },
     });
 
-    // Send emails (don't block the response)
-    Promise.all([
-      sendQuoteRequestConfirmation(email, { name, quoteNumber }),
-      sendAdminNewQuoteNotification({ quoteNumber, name, city, propertyType, rooms, phone }),
-    ]).catch((err) => console.error("Error sending quote request emails:", err));
+    // Send emails (must await on serverless/Vercel)
+    try {
+      await Promise.all([
+        sendQuoteRequestConfirmation(email, { name, quoteNumber }),
+        sendAdminNewQuoteNotification({ quoteNumber, name, city, propertyType, rooms, phone }),
+      ]);
+    } catch (err) {
+      console.error("Error sending emails:", err);
+    }
 
     return NextResponse.json({
       success: true,

@@ -115,10 +115,14 @@ export async function PATCH(
 
   // Send email when status changes to SENT
   if (status === "SENT" && quote.status !== "SENT") {
-    sendQuoteReadyNotification(quote.email, {
-      name: quote.name,
-      quoteNumber: quote.quoteNumber,
-    }).catch((err) => console.error("Error sending quote ready email:", err));
+    try {
+      await sendQuoteReadyNotification(quote.email, {
+        name: quote.name,
+        quoteNumber: quote.quoteNumber,
+      });
+    } catch (err) {
+      console.error("Error sending quote ready email:", err);
+    }
   }
 
   const newLines = await prisma.quoteLine.findMany({
