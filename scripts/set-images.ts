@@ -9,12 +9,14 @@ const prisma = new PrismaClient({ adapter: new PrismaPg(pool) });
 // Map: brand + description keywords -> image path
 const IMAGE_RULES: { brand: string; match: (desc: string, type: string, model: string) => boolean; image: string }[] = [
   // === GREE (from greebelgium.be + aircobeurs.nl) ===
-  { brand: "Gree", match: (d, t) => d.includes("Fairy") && t === "Wand" && d.includes("antraciet"), image: "/products/gree-fairy-zwart.jpg" },
+  { brand: "Gree", match: (d, t) => d.includes("Fairy") && t === "Wand" && d.includes("antraciet"), image: "/products/gree-fairy-antraciet.jpg" },
   { brand: "Gree", match: (d, t) => d.includes("Fairy") && t === "Wand" && d.includes("zilver"), image: "/products/gree-fairy-zilver.jpg" },
   { brand: "Gree", match: (d, t) => d.includes("Fairy") && t === "Wand", image: "/products/gree-fairy.jpg" },
   { brand: "Gree", match: (d, t) => d.includes("Clivia") && t === "Wand" && d.includes("antraciet"), image: "/products/gree-clivia-antraciet.jpg" },
   { brand: "Gree", match: (d, t) => d.includes("Clivia") && t === "Wand" && d.includes("zilver"), image: "/products/gree-clivia-zilver.jpg" },
   { brand: "Gree", match: (d, t) => d.includes("Clivia") && t === "Wand", image: "/products/gree-clivia-wit.jpg" },
+  { brand: "Gree", match: (d, t) => d.includes("Airy") && t === "Wand" && d.includes("antraciet"), image: "/products/gree-airy-antraciet.png" },
+  { brand: "Gree", match: (d, t) => d.includes("Airy") && t === "Wand" && d.includes("zilver"), image: "/products/gree-airy-zilver.webp" },
   { brand: "Gree", match: (d, t) => d.includes("Airy") && t === "Wand", image: "/products/gree-airy.png" },
   { brand: "Gree", match: (d, t) => d.includes("Charmo") && t === "Wand", image: "/products/gree-charmo.png" },
   { brand: "Gree", match: (_, t) => t === "Console", image: "/products/gree-console.jpg" },
