@@ -1,16 +1,9 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import jsPDFModule from "jspdf";
-import "jspdf-autotable";
+import autoTable from "jspdf-autotable";
 
-// Handle both ESM and CJS imports
-const jsPDF = ("jsPDF" in jsPDFModule ? jsPDFModule.jsPDF : jsPDFModule) as typeof jsPDFModule;
-
-// Extend jsPDF with autoTable
-declare module "jspdf" {
-  interface jsPDF {
-    autoTable: (options: Record<string, unknown>) => jsPDF;
-    lastAutoTable: { finalY: number };
-  }
-}
+// Handle both ESM and CJS imports for Node.js/Vercel compatibility
+const jsPDF = ("jsPDF" in jsPDFModule ? (jsPDFModule as any).jsPDF : jsPDFModule) as any;
 
 interface QuoteLine {
   productName: string;
@@ -242,7 +235,7 @@ export function generateQuotePDF(quote: QuoteData): Buffer {
   if (quote.lines.length > 0) {
     drawSectionTitle("Specificatie");
 
-    doc.autoTable({
+    const tableResult = autoTable(doc, {
       startY: y,
       margin: { left: margin, right: margin },
       head: [["Product", "Omschrijving", "Aantal", "Prijs/stuk", "Totaal"]],
@@ -275,7 +268,7 @@ export function generateQuotePDF(quote: QuoteData): Buffer {
       alternateRowStyles: { fillColor: "#f8fafc" },
     });
 
-    y = doc.lastAutoTable.finalY + 6;
+    y = (tableResult as unknown as { finalY: number }).finalY + 6;
   }
 
   // ═══════════════════════════════════════════════════
