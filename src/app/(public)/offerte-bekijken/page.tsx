@@ -282,8 +282,93 @@ function OfferteBekijkenContent() {
           </div>
         )}
 
+        {/* Pending state — quote still being prepared */}
+        {quote && quote.status === "PENDING" && (
+          <div className="space-y-6">
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 md:p-12 text-center">
+              {/* Animated clock icon */}
+              <div className="mx-auto w-20 h-20 bg-amber-50 rounded-full flex items-center justify-center mb-6">
+                <svg className="w-10 h-10 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+
+              <h2 className="text-2xl font-bold text-gray-900 mb-3">
+                Uw offerte wordt opgesteld
+              </h2>
+
+              <p className="text-gray-600 max-w-md mx-auto mb-2">
+                Wij zijn op dit moment bezig met het samenstellen van uw offerte. U ontvangt automatisch een e-mail zodra deze klaar is.
+              </p>
+
+              <div className="bg-gray-50 rounded-xl p-5 max-w-sm mx-auto my-8">
+                <p className="text-xs text-gray-400 uppercase tracking-wide mb-1">Offertenummer</p>
+                <p className="text-xl font-bold font-mono text-gray-900">{quote.quoteNumber}</p>
+              </div>
+
+              {/* Timeline */}
+              <div className="max-w-xs mx-auto text-left mb-8">
+                <div className="flex items-start gap-3 mb-4">
+                  <div className="mt-0.5 w-6 h-6 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
+                    <svg className="w-3.5 h-3.5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                    </svg>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-900">Aanvraag ontvangen</p>
+                    <p className="text-xs text-gray-400">{new Date(quote.signedAt || Date.now()).toLocaleDateString("nl-NL") !== "Invalid Date" ? "" : ""}Uw aanvraag is bij ons binnengekomen</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3 mb-4">
+                  <div className="mt-0.5 w-6 h-6 bg-amber-100 rounded-full flex items-center justify-center flex-shrink-0">
+                    <div className="w-2 h-2 bg-amber-500 rounded-full animate-pulse"></div>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-900">Offerte wordt opgesteld</p>
+                    <p className="text-xs text-gray-400">Wij werken aan uw offerte</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="mt-0.5 w-6 h-6 bg-gray-100 rounded-full flex items-center justify-center flex-shrink-0">
+                    <div className="w-2 h-2 bg-gray-300 rounded-full"></div>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-400">Offerte gereed</p>
+                    <p className="text-xs text-gray-300">U ontvangt een e-mail met een directe link</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Contact section */}
+              <div className="border-t border-gray-100 pt-6">
+                <p className="text-gray-600 mb-4">Heeft u vragen of wilt u meer informatie?</p>
+                <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                  <a
+                    href="tel:+31641088447"
+                    className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-[#1e3a5f] text-white font-semibold rounded-lg hover:bg-[#162d4a] transition-colors"
+                  >
+                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                    </svg>
+                    Bel 06-41088447
+                  </a>
+                  <a
+                    href="mailto:info@endatech.nl"
+                    className="inline-flex items-center justify-center gap-2 px-6 py-3 border border-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-50 transition-colors"
+                  >
+                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                    </svg>
+                    E-mail ons
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Quote Display */}
-        {quote && (
+        {quote && quote.status !== "PENDING" && (
           <div className="space-y-6">
             {/* Back button */}
             <button
@@ -459,11 +544,6 @@ function OfferteBekijkenContent() {
                 </a>
               </div>
 
-              {quote.status === "PENDING" && (
-                <p className="mt-4 text-center text-gray-500 text-sm">
-                  Je offerte wordt nog samengesteld. Je kunt ondertekenen zodra de offerte gereed is.
-                </p>
-              )}
             </div>
           </div>
         )}
