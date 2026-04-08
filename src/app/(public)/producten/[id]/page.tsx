@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
+import { getSeriesSpec } from "@/lib/product-specs";
 
 interface AircoModel {
   id: string;
@@ -87,6 +88,7 @@ export default function ProductDetailPage() {
   const kw = parseFloat((product.coolingCapacity || "0").replace(" kW", ""));
   const roomSize = kw > 0 ? getCapacityRoom(kw) : null;
   const brandInfo = BRAND_INFO[product.brand];
+  const spec = getSeriesSpec(product.brand, product.description);
 
   function formatPrice(p: number | null, inst: number | null): string | null {
     if (p == null) return null;
@@ -210,6 +212,26 @@ export default function ProductDetailPage() {
         </div>
       </section>
 
+      {/* Beschrijving */}
+      {spec && (
+        <section className="py-10 bg-white border-t border-gray-100">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="max-w-3xl">
+              <h2 className="text-2xl font-bold text-gray-900 mb-4">Over dit product</h2>
+              <p className="text-gray-600 leading-relaxed">{spec.description}</p>
+
+              {spec.technologies.length > 0 && (
+                <div className="flex flex-wrap gap-2 mt-4">
+                  {spec.technologies.map((t) => (
+                    <span key={t} className="bg-[#2563EB]/10 text-[#2563EB] px-3 py-1 rounded-full text-xs font-semibold">{t}</span>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </section>
+      )}
+
       {/* Productdetails */}
       <section className="py-12 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -274,10 +296,42 @@ export default function ProductDetailPage() {
                   </div>
                 )}
                 {desc.fase && (
-                  <div className="flex justify-between py-2">
+                  <div className="flex justify-between py-2 border-b border-gray-100">
                     <dt className="text-gray-500">Aansluiting</dt>
                     <dd className="font-medium text-gray-900">{desc.fase}</dd>
                   </div>
+                )}
+                {spec && (
+                  <>
+                    <div className="flex justify-between py-2 border-b border-gray-100">
+                      <dt className="text-gray-500">SEER (koelefficiëntie)</dt>
+                      <dd className="font-medium text-gray-900">{spec.seer}</dd>
+                    </div>
+                    <div className="flex justify-between py-2 border-b border-gray-100">
+                      <dt className="text-gray-500">SCOP (verwarmingsefficiëntie)</dt>
+                      <dd className="font-medium text-gray-900">{spec.scop}</dd>
+                    </div>
+                    <div className="flex justify-between py-2 border-b border-gray-100">
+                      <dt className="text-gray-500">Energielabel koelen</dt>
+                      <dd className="font-medium text-gray-900">{spec.energyLabelCool}</dd>
+                    </div>
+                    <div className="flex justify-between py-2 border-b border-gray-100">
+                      <dt className="text-gray-500">Energielabel verwarmen</dt>
+                      <dd className="font-medium text-gray-900">{spec.energyLabelHeat}</dd>
+                    </div>
+                    <div className="flex justify-between py-2 border-b border-gray-100">
+                      <dt className="text-gray-500">Geluidsniveau binnenunit</dt>
+                      <dd className="font-medium text-gray-900">{spec.noiseIndoor}</dd>
+                    </div>
+                    <div className="flex justify-between py-2 border-b border-gray-100">
+                      <dt className="text-gray-500">WiFi</dt>
+                      <dd className="font-medium text-gray-900 text-right text-sm">{spec.wifi}</dd>
+                    </div>
+                    <div className="flex justify-between py-2">
+                      <dt className="text-gray-500">Koudemiddel</dt>
+                      <dd className="font-medium text-gray-900">{spec.refrigerant}</dd>
+                    </div>
+                  </>
                 )}
               </dl>
             </div>
@@ -287,16 +341,14 @@ export default function ProductDetailPage() {
               <div className="bg-white rounded-2xl p-6 shadow-sm">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">Kenmerken</h3>
                 <ul className="space-y-3">
-                  {[
+                  {(spec ? spec.features : [
                     "Inverter technologie voor optimaal rendement",
                     "Koelen en verwarmen in \u00E9\u00E9n systeem",
                     "Milieuvriendelijk R32 koudemiddel",
                     "Fluisterstille werking",
                     product.type === "Wand" ? "WiFi-besturing via app" : null,
                     product.type === "Wand" ? "Eenvoudige wandmontage" : null,
-                    product.type === "Vloer & Plafond" ? "Flexibele plaatsing" : null,
-                    product.type === "Cassette" ? "Inbouw in verlaagd plafond" : null,
-                  ].filter(Boolean).map((item) => (
+                  ]).filter(Boolean).map((item) => (
                     <li key={item} className="flex items-start gap-3 text-gray-600">
                       <svg className="w-5 h-5 text-[#22D3EE] flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
                         <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
