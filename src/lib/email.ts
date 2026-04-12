@@ -313,3 +313,49 @@ export async function sendCustomerSignedConfirmation(to: string, data: {
       : undefined,
   });
 }
+
+// ── Email 6: Contactformulier — notificatie naar admin ──
+
+export async function sendContactFormNotification(data: {
+  name: string;
+  email: string;
+  phone?: string | null;
+  subject: string;
+  message: string;
+}) {
+  const subjectLabels: Record<string, string> = {
+    offerte: 'Offerte aanvraag',
+    onderhoud: 'Onderhoud',
+    storing: 'Storing',
+    algemeen: 'Algemeen',
+    anders: 'Anders',
+  };
+
+  const html = layout(`
+    <h2 style="color:#1e3a5f;font-size:20px;">Nieuw contactformulier bericht</h2>
+    <p style="color:#334155;line-height:1.6;">
+      Er is een nieuw bericht binnengekomen via het contactformulier op de website.
+    </p>
+    <table style="width:100%;border-collapse:collapse;margin:16px 0;">
+      <tr><td style="padding:8px;color:#64748b;border-bottom:1px solid #e2e8f0;">Naam</td><td style="padding:8px;font-weight:bold;border-bottom:1px solid #e2e8f0;">${data.name}</td></tr>
+      <tr><td style="padding:8px;color:#64748b;border-bottom:1px solid #e2e8f0;">E-mail</td><td style="padding:8px;border-bottom:1px solid #e2e8f0;"><a href="mailto:${data.email}" style="color:#1e3a5f;">${data.email}</a></td></tr>
+      <tr><td style="padding:8px;color:#64748b;border-bottom:1px solid #e2e8f0;">Telefoon</td><td style="padding:8px;border-bottom:1px solid #e2e8f0;">${data.phone || '—'}</td></tr>
+      <tr><td style="padding:8px;color:#64748b;border-bottom:1px solid #e2e8f0;">Onderwerp</td><td style="padding:8px;border-bottom:1px solid #e2e8f0;">${subjectLabels[data.subject] || data.subject}</td></tr>
+    </table>
+    <div style="background:#f8fafc;border-radius:8px;padding:16px;margin:16px 0;border:1px solid #e2e8f0;">
+      <h3 style="color:#1e3a5f;font-size:14px;margin:0 0 8px;">Bericht</h3>
+      <p style="color:#334155;line-height:1.6;margin:0;white-space:pre-wrap;">${data.message}</p>
+    </div>
+    <p style="color:#64748b;font-size:13px;">
+      Je kunt direct antwoorden door te reageren op dit e-mailbericht.
+    </p>
+  `);
+
+  await transporter.sendMail({
+    from,
+    to: adminEmail,
+    replyTo: data.email,
+    subject: `Contactformulier: ${subjectLabels[data.subject] || data.subject} — ${data.name}`,
+    html,
+  });
+}

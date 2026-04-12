@@ -150,8 +150,8 @@ export function generateQuotePDF(quote: QuoteData): Buffer {
   // HEADER — Blue top bar with logo
   // ═══════════════════════════════════════════════════
 
-  // Blue header bar
-  doc.setFillColor(BRAND_BLUE);
+  // White header bar
+  doc.setFillColor("#ffffff");
   doc.rect(0, 0, pageWidth, 32, "F");
 
   // Red accent line under header
@@ -176,21 +176,21 @@ export function generateQuotePDF(quote: QuoteData): Buffer {
   function drawTextLogo() {
     doc.setFontSize(20);
     doc.setFont("helvetica", "bold");
-    doc.setTextColor("#ffffff");
+    doc.setTextColor(BRAND_DARK);
     doc.text("ENDA", margin, 18);
     const endaW = doc.getTextWidth("ENDA");
     doc.setTextColor(BRAND_RED);
     doc.text("TECH", margin + endaW, 18);
     doc.setFontSize(8);
     doc.setFont("helvetica", "normal");
-    doc.setTextColor("#ffffff");
+    doc.setTextColor(GRAY);
     doc.text("Duurzaam koelen en verwarmen", margin, 24);
   }
 
   // Right: Document type + quote number
   doc.setFontSize(9);
   doc.setFont("helvetica", "bold");
-  doc.setTextColor("#ffffff");
+  doc.setTextColor(BRAND_BLUE_DARK);
   const docType = quote.signed ? "OVEREENKOMST" : "OFFERTE";
   doc.text(docType, pageWidth - margin, 11, { align: "right" });
 
@@ -199,6 +199,7 @@ export function generateQuotePDF(quote: QuoteData): Buffer {
 
   doc.setFont("helvetica", "normal");
   doc.setFontSize(8);
+  doc.setTextColor(GRAY);
   doc.text(`Datum: ${formatDate(quote.createdAt)}`, pageWidth - margin, 25, { align: "right" });
   if (quote.validUntil) {
     doc.text(`Geldig tot: ${formatDate(quote.validUntil)}`, pageWidth - margin, 30, { align: "right" });
