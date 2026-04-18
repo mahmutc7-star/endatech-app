@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node -e ':*)",
+      "Bash(grep -E \"===|\\\\\\\\[|x  /\")",
+      "Bash(curl -sL -H 'User-Agent: Mozilla/5.0 \\(Windows NT 10.0; Win64; x64\\) AppleWebKit/537.36' -o 'c:/Users/Admin/OneDrive - Stichting Onze Zorgen/Documenten/endatech/public/products/lg-deluxe.jpg' 'https://www.lgklimaat.nl/media/gjgldzkz/01_s1_s3nm121a1d0_front.jpg?width=600')",
+      "Bash(curl -sL -H 'User-Agent: Mozilla/5.0 \\(Windows NT 10.0; Win64; x64\\) AppleWebKit/537.36' -o 'c:/Users/Admin/OneDrive - Stichting Onze Zorgen/Documenten/endatech/public/products/mitsubishi-heavy-premium.png' https://mhinederland.nl/images/producten/srk-zs/slider/ZS%20wandunit%20wit-zwart.png)",
+      "Bash(node -e 'const buf=require\\('\\\\''fs'\\\\''\\).readFileSync\\('\\\\''c:/Users/Admin/OneDrive - Stichting Onze Zorgen/Documenten/endatech/public/products/mitsubishi-heavy-premium.png'\\\\''\\);if\\(buf[0]===0x89\\)console.log\\(buf.readUInt32BE\\(16\\)+'\\\\''x'\\\\''+buf.readUInt32BE\\(20\\)\\)')"
+    ]
+  }
+}
