@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 
@@ -11,6 +11,15 @@ interface QuoteLine {
   quantity: number;
   unitPrice: number;
   lineTotal: number;
+}
+
+interface AircoModel {
+  id: string;
+  brand: string;
+  model: string;
+  price: number | null;
+  installationPrice: number | null;
+  active: boolean;
 }
 
 interface Quote {
@@ -82,6 +91,50 @@ export default function AdminQuotePage() {
   const [status, setStatus] = useState("");
   const [btwPercentage, setBtwPercentage] = useState(21);
   const [lines, setLines] = useState<QuoteLine[]>([{ ...EMPTY_LINE }]);
+  const [aircoModels, setAircoModels] = useState<AircoModel[]>([]);
+
+  useEffect(() => {
+    fetch("/api/admin/airco-models")
+      .then((res) => res.ok ? res.json() : [])
+      .then((data: AircoModel[]) => setAircoModels(data.filter((m) => m.active)));
+  }, []);
+
+  const modelsByBrand = useMemo(() => {
+    const groups: Record<string, AircoModel[]> = {};
+    for (const m of aircoModels) (groups[m.brand] ??= []).push(m);
+    return Object.entries(groups).sort(([a], [b]) => a.localeCompare(b));
+  }, [aircoModels]);
+
+  function selectedValue(productName: string): string {
+    if (productName === "Diversen") return "DIVERSEN";
+    const m = aircoModels.find((m) => `${m.brand} ${m.model}` === productName);
+    return m ? m.id : "";
+  }
+
+  function handlePickProduct(index: number, value: string) {
+    if (value === "") return;
+    if (value === "DIVERSEN") {
+      setLines((prev) => {
+        const updated = [...prev];
+        const line = { ...updated[index], productName: "Diversen", unitPrice: 0 };
+        line.lineTotal = line.quantity * line.unitPrice;
+        updated[index] = line;
+        return updated;
+      });
+      return;
+    }
+    const model = aircoModels.find((m) => m.id === value);
+    if (!model) return;
+    const productName = `${model.brand} ${model.model}`;
+    const unitPrice = (model.price ?? 0) + (model.installationPrice ?? 0);
+    setLines((prev) => {
+      const updated = [...prev];
+      const line = { ...updated[index], productName, unitPrice };
+      line.lineTotal = line.quantity * line.unitPrice;
+      updated[index] = line;
+      return updated;
+    });
+  }
 
   const fetchQuote = useCallback(async () => {
     try {
@@ -330,13 +383,26 @@ export default function AdminQuotePage() {
                 {lines.map((line, i) => (
                   <tr key={i} className="border-b border-gray-100">
                     <td className="py-2 pr-2">
-                      <input
-                        type="text"
-                        value={line.productName}
-                        onChange={(e) => updateLine(i, "productName", e.target.value)}
-                        placeholder="Productnaam"
-                        className="w-full px-2 py-1.5 border border-gray-200 rounded text-sm focus:ring-2 focus:ring-[#2563EB] focus:border-transparent outline-none"
-                      />
+                      <select
+                        value={selectedValue(line.productName)}
+                        onChange={(e) => handlePickProduct(i, e.target.value)}
+                        className="w-full px-2 py-1.5 border border-gray-200 rounded text-sm focus:ring-2 focus:ring-[#2563EB] focus:border-transparent outline-none bg-white"
+                      >
+                        <option value="">— Kies product —</option>
+                        <option value="DIVERSEN">Diversen</option>
+                        {modelsByBrand.map(([brand, items]) => (
+                          <optgroup key={brand} label={brand}>
+                            {items.map((m) => {
+                              const p = (m.price ?? 0) + (m.installationPrice ?? 0);
+                              return (
+                                <option key={m.id} value={m.id}>
+                                  {m.model}{p > 0 ? ` — € ${p.toLocaleString("nl-NL", { minimumFractionDigits: 2 })}` : ""}
+                                </option>
+                              );
+                            })}
+                          </optgroup>
+                        ))}
+                      </select>
                     </td>
                     <td className="py-2 pr-2">
                       <input
@@ -622,6 +688,7 @@ export default function AdminQuotePage() {
           </div>
         </div>
       )}
+
     </div>
   );
 }
