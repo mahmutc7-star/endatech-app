@@ -189,7 +189,20 @@ export default function AdminPage() {
                         <td className="px-4 py-3 text-gray-500 hidden lg:table-cell">
                           {new Date(quote.createdAt).toLocaleDateString("nl-NL")}
                         </td>
-                        <td className="px-4 py-3 text-right">
+                        <td className="px-4 py-3 text-right whitespace-nowrap">
+                          <a
+                            href={`/api/admin/quotes/${quote.quoteNumber}/pdf`}
+                            download={`EndaTech-${quote.signed ? "Overeenkomst" : "Offerte"}-${quote.quoteNumber}.pdf`}
+                            onClick={(e) => e.stopPropagation()}
+                            className="inline-flex items-center gap-1 px-2 py-1.5 text-red-600 hover:bg-red-50 rounded-lg transition-colors text-xs font-semibold mr-1 align-middle"
+                            title="PDF downloaden"
+                          >
+                            <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6Zm-1 1.5L18.5 9H13V3.5Z"/>
+                              <text x="12" y="17.5" textAnchor="middle" fontSize="6.5" fontWeight="700" fill="white" fontFamily="Arial, sans-serif">PDF</text>
+                            </svg>
+                            <span className="hidden sm:inline">PDF</span>
+                          </a>
                           <button
                             type="button"
                             onClick={(e) => {
@@ -197,7 +210,7 @@ export default function AdminPage() {
                               e.preventDefault();
                               setDeleteTarget(quote.quoteNumber);
                             }}
-                            className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                            className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors align-middle"
                             title="Verwijderen"
                           >
                             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
